@@ -1,0 +1,201 @@
+import { useState } from "react";
+
+// 定义组件 Props 的类型
+interface ClipEmptyResultProps {
+  query?: string;
+  onRetry?: () => void;
+  onClearSearch?: () => void;
+}
+
+export default function ClipEmptyResult({
+  query = "",
+  onRetry,
+  onClearSearch,
+}: ClipEmptyResultProps) {
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    if (onRetry) {
+      await onRetry();
+    }
+    setTimeout(() => setIsRetrying(false), 1000);
+  };
+
+  const suggestions = [
+    "尝试使用更简单的关键词",
+    "检查拼写是否正确",
+    "使用不同的搜索词组合",
+    "尝试更通用的描述词",
+  ];
+
+  const popularTags = [
+    "风景",
+    "美食",
+    "旅行",
+    "音乐",
+    "运动",
+    "科技",
+    "艺术",
+    "动物",
+    "城市",
+    "自然",
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* 空状态主要内容 */}
+        <div className="text-center mb-12 animate-fade-in-up">
+          {/* 空状态图标 */}
+          <div className="mb-8">
+            <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full mb-6 animate-pulse">
+              <svg
+                className="w-16 h-16 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* 标题和描述 */}
+          <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            🔍 未找到相关视频
+          </h2>
+
+          {query && (
+            <p className="text-gray-600 text-lg mb-2">
+              没有找到与 "
+              <span className="font-semibold text-gray-800">{query}</span>"
+              相关的视频片段
+            </p>
+          )}
+
+          <p className="text-gray-500 text-base max-w-md mx-auto">
+            别担心，试试调整搜索条件或浏览热门内容
+          </p>
+        </div>
+
+        {/* 操作按钮区域 */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          {onRetry && (
+            <button
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isRetrying ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>重新搜索中...</span>
+                </div>
+              ) : (
+                "重新搜索"
+              )}
+            </button>
+          )}
+
+          {onClearSearch && (
+            <button
+              onClick={onClearSearch}
+              className="bg-white text-gray-700 px-8 py-3 rounded-full font-semibold border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 hover:border-gray-300"
+            >
+              清除搜索
+            </button>
+          )}
+        </div>
+
+        {/* 搜索建议 */}
+        <div
+          className="bg-white rounded-2xl shadow-lg p-8 mb-8 animate-fade-in-up"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+            💡 搜索建议
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {suggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-300"
+              >
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <svg
+                    className="w-3 h-3 text-blue-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <span className="text-gray-700">{suggestion}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 热门标签 */}
+        <div
+          className="bg-white rounded-2xl shadow-lg p-8 animate-fade-in-up"
+          style={{ animationDelay: "0.4s" }}
+        >
+          <h3 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+            🔥 热门标签
+          </h3>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            {popularTags.map((tag, index) => (
+              <button
+                key={index}
+                className="px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-full font-medium hover:from-blue-100 hover:to-purple-100 hover:text-blue-600 transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md"
+                onClick={() => {
+                  // 这里可以触发搜索该标签
+                  console.log(`搜索标签: ${tag}`);
+                }}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 底部装饰 */}
+        <div
+          className="text-center mt-12 animate-fade-in-up"
+          style={{ animationDelay: "0.6s" }}
+        >
+          <div className="inline-flex items-center text-gray-400 text-sm">
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            继续探索，发现更多精彩内容
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 导出类型，方便其他文件使用
+export type { ClipEmptyResultProps };

@@ -1,0 +1,223 @@
+import { useQuery } from "@tanstack/react-query";
+import { ClipSearchResult, queryClips } from "../src/api/clips";
+
+interface Props {
+  keyword: string;
+}
+
+export default function ClipResult({ keyword }: Props) {
+  const query = useQuery({
+    queryKey: ["clips", keyword],
+    queryFn: () => queryClips(keyword),
+    enabled: true,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return (
+    <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-y-auto">
+      <div className="py-8 px-6">
+        <div className="max-w-6xl mx-auto">
+          {/* 结果标题 */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">
+              🎬 视频片段
+            </h2>
+            {query && (
+              <p className="text-gray-600 text-base mb-2">
+                搜索关键词: "
+                <span className="font-semibold text-blue-600">{keyword}</span>"
+              </p>
+            )}
+            <p className="text-gray-500 text-sm">
+              找到 {query.data?.length ?? 0} 个相关视频片段
+            </p>
+          </div>
+
+          {/* 视频卡片网格 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {(query.data ?? []).map((item: ClipSearchResult, index: number) => {
+              // 生成随机封面图片
+              const generateCoverImage = (id: string): string => {
+                const imageCategories = [
+                  "nature",
+                  "city",
+                  "technology",
+                  "abstract",
+                  "animals",
+                  "food",
+                  "travel",
+                  "sports",
+                  "music",
+                  "art",
+                ];
+
+                const hash = id.split("").reduce((a, b) => {
+                  a = (a << 5) - a + b.charCodeAt(0);
+                  return a & a;
+                }, 0);
+
+                const categoryIndex = Math.abs(hash) % imageCategories.length;
+                const category = imageCategories[categoryIndex];
+
+                return `https://picsum.photos/seed/${id}-${category}/400/225`;
+              };
+
+              // 格式化点赞数
+              const formatLikes = (likes: number): string => {
+                if (likes >= 1000000) {
+                  return (likes / 1000000).toFixed(1) + "M";
+                }
+                if (likes >= 1000) {
+                  return (likes / 1000).toFixed(1) + "K";
+                }
+                return likes.toString();
+              };
+
+              // 格式化文件大小
+              const formatFileSize = (bytes: number): string => {
+                if (bytes >= 1024 * 1024 * 1024) {
+                  return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+                }
+                if (bytes >= 1024 * 1024) {
+                  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+                }
+                if (bytes >= 1024) {
+                  return (bytes / 1024).toFixed(1) + " KB";
+                }
+                return bytes + " B";
+              };
+
+              // 格式化上传时间
+              const formatUploadTime = (uploadTime: string): string => {
+                try {
+                  const date = new Date(uploadTime);
+                  return date.toLocaleDateString("zh-CN");
+                } catch {
+                  return "未知时间";
+                }
+              };
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
+                >
+                  {/* 封面图片 */}
+                  <div className="relative">
+                    <img
+                      src={generateCoverImage(item.id)}
+                      alt={item.title}
+                      className="w-full h-40 object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = `https://via.placeholder.com/400x225/4F46E5/FFFFFF?text=${encodeURIComponent(
+                          item.title.slice(0, 10)
+                        )}`;
+                      }}
+                    />
+
+                    {/* 时长标签 */}
+                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                      {item.duration}
+                    </div>
+
+                    {/* 文件大小标签 */}
+                    <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                      {formatFileSize(item.file_size)}
+                    </div>
+                  </div>
+
+                  {/* 卡片内容 */}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
+                      {item.title}
+                    </h3>
+
+                    {/* 文件信息 */}
+                    <div className="text-sm text-gray-500 mb-3">
+                      <p
+                        className="truncate mb-1"
+                        title={item.original_filename}
+                      >
+                        📁 {item.original_filename}
+                      </p>
+                      <p>⏰ {formatUploadTime(item.upload_time)}</p>
+                    </div>
+
+                    {/* 底部操作栏 */}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      {/* 点赞 */}
+                      <div className="flex items-center space-x-1 text-gray-600">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          />
+                        </svg>
+                        <span className="text-sm">
+                          {formatLikes(item.likes)}
+                        </span>
+                      </div>
+
+                      {/* 分享按钮 */}
+                      <button
+                        className="text-gray-400 hover:text-blue-500 transition-colors"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            `${window.location.origin}/video/${item.id}`
+                          );
+                        }}
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                          />
+                        </svg>
+                      </button>
+
+                      {/* 下载按钮 */}
+                      <button
+                        className="text-gray-400 hover:text-green-500 transition-colors"
+                        onClick={() => {
+                          console.log("Download video:", item.id);
+                        }}
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

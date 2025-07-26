@@ -1,0 +1,224 @@
+directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+directive @goModel(model: String, models: [String!], forceGenerate: Boolean) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+"""
+Define a Relay Cursor type:
+https://relay.dev/graphql/connections.htm#sec-Cursor
+"""
+scalar Cursor
+type EntClipMetadata implements Node {
+  id: ID!
+  """
+  关联的剪辑任务ID
+  """
+  jobID: String!
+  """
+  剪辑文件名
+  """
+  filename: String!
+  """
+  剪辑文件访问地址
+  """
+  fileURL: String!
+  """
+  文件大小（字节）
+  """
+  fileSize: Int!
+  """
+  视频时长（秒）
+  """
+  duration: Int!
+  """
+  视频格式
+  """
+  format: String!
+  """
+  视频分辨率
+  """
+  resolution: String!
+}
+"""
+A connection to a list of items.
+"""
+type EntClipMetadataConnection {
+  """
+  A list of edges.
+  """
+  edges: [EntClipMetadataEdge]
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+  """
+  Identifies the total count of items in the connection.
+  """
+  totalCount: Int!
+}
+"""
+An edge in a connection.
+"""
+type EntClipMetadataEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: EntClipMetadata
+  """
+  A cursor for use in pagination.
+  """
+  cursor: Cursor!
+}
+type EntVideoMetadata implements Node {
+  id: ID!
+  """
+  视频原始地址
+  """
+  url: String!
+  """
+  原始文件名
+  """
+  filename: String!
+  """
+  文件大小(字节)
+  """
+  fileSize: Int!
+  """
+  文件MIME类型
+  """
+  contentType: String!
+}
+"""
+A connection to a list of items.
+"""
+type EntVideoMetadataConnection {
+  """
+  A list of edges.
+  """
+  edges: [EntVideoMetadataEdge]
+  """
+  Information to aid in pagination.
+  """
+  pageInfo: PageInfo!
+  """
+  Identifies the total count of items in the connection.
+  """
+  totalCount: Int!
+}
+"""
+An edge in a connection.
+"""
+type EntVideoMetadataEdge {
+  """
+  The item at the end of the edge.
+  """
+  node: EntVideoMetadata
+  """
+  A cursor for use in pagination.
+  """
+  cursor: Cursor!
+}
+"""
+An object with an ID.
+Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
+"""
+interface Node @goModel(model: "com.gigaboo/clipserver/ent.Noder") {
+  """
+  The id of the object.
+  """
+  id: ID!
+}
+"""
+Possible directions in which to order a list of items when provided an `orderBy` argument.
+"""
+enum OrderDirection {
+  """
+  Specifies an ascending order for a given `orderBy` argument.
+  """
+  ASC
+  """
+  Specifies a descending order for a given `orderBy` argument.
+  """
+  DESC
+}
+"""
+Information about pagination in a connection.
+https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
+"""
+type PageInfo {
+  """
+  When paginating forwards, are there more items?
+  """
+  hasNextPage: Boolean!
+  """
+  When paginating backwards, are there more items?
+  """
+  hasPreviousPage: Boolean!
+  """
+  When paginating backwards, the cursor to continue.
+  """
+  startCursor: Cursor
+  """
+  When paginating forwards, the cursor to continue.
+  """
+  endCursor: Cursor
+}
+type Query {
+  """
+  Fetches an object given its ID.
+  """
+  node(
+    """
+    ID of the object.
+    """
+    id: ID!
+  ): Node
+  """
+  Lookup nodes by a list of IDs.
+  """
+  nodes(
+    """
+    The list of node IDs.
+    """
+    ids: [ID!]!
+  ): [Node]!
+  entClipMetadataSlice(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: Cursor
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: Cursor
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): EntClipMetadataConnection!
+  entVideoMetadataSlice(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: Cursor
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: Cursor
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): EntVideoMetadataConnection!
+}

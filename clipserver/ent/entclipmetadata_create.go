@@ -19,12 +19,6 @@ type EntClipMetadataCreate struct {
 	hooks    []Hook
 }
 
-// SetJobID sets the "job_id" field.
-func (ecmc *EntClipMetadataCreate) SetJobID(s string) *EntClipMetadataCreate {
-	ecmc.mutation.SetJobID(s)
-	return ecmc
-}
-
 // SetFilename sets the "filename" field.
 func (ecmc *EntClipMetadataCreate) SetFilename(s string) *EntClipMetadataCreate {
 	ecmc.mutation.SetFilename(s)
@@ -59,20 +53,6 @@ func (ecmc *EntClipMetadataCreate) SetFormat(s string) *EntClipMetadataCreate {
 func (ecmc *EntClipMetadataCreate) SetNillableFormat(s *string) *EntClipMetadataCreate {
 	if s != nil {
 		ecmc.SetFormat(*s)
-	}
-	return ecmc
-}
-
-// SetResolution sets the "resolution" field.
-func (ecmc *EntClipMetadataCreate) SetResolution(s string) *EntClipMetadataCreate {
-	ecmc.mutation.SetResolution(s)
-	return ecmc
-}
-
-// SetNillableResolution sets the "resolution" field if the given value is not nil.
-func (ecmc *EntClipMetadataCreate) SetNillableResolution(s *string) *EntClipMetadataCreate {
-	if s != nil {
-		ecmc.SetResolution(*s)
 	}
 	return ecmc
 }
@@ -116,22 +96,10 @@ func (ecmc *EntClipMetadataCreate) defaults() {
 		v := entclipmetadata.DefaultFormat
 		ecmc.mutation.SetFormat(v)
 	}
-	if _, ok := ecmc.mutation.Resolution(); !ok {
-		v := entclipmetadata.DefaultResolution
-		ecmc.mutation.SetResolution(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (ecmc *EntClipMetadataCreate) check() error {
-	if _, ok := ecmc.mutation.JobID(); !ok {
-		return &ValidationError{Name: "job_id", err: errors.New(`ent: missing required field "EntClipMetadata.job_id"`)}
-	}
-	if v, ok := ecmc.mutation.JobID(); ok {
-		if err := entclipmetadata.JobIDValidator(v); err != nil {
-			return &ValidationError{Name: "job_id", err: fmt.Errorf(`ent: validator failed for field "EntClipMetadata.job_id": %w`, err)}
-		}
-	}
 	if _, ok := ecmc.mutation.Filename(); !ok {
 		return &ValidationError{Name: "filename", err: errors.New(`ent: missing required field "EntClipMetadata.filename"`)}
 	}
@@ -167,9 +135,6 @@ func (ecmc *EntClipMetadataCreate) check() error {
 	if _, ok := ecmc.mutation.Format(); !ok {
 		return &ValidationError{Name: "format", err: errors.New(`ent: missing required field "EntClipMetadata.format"`)}
 	}
-	if _, ok := ecmc.mutation.Resolution(); !ok {
-		return &ValidationError{Name: "resolution", err: errors.New(`ent: missing required field "EntClipMetadata.resolution"`)}
-	}
 	return nil
 }
 
@@ -196,10 +161,6 @@ func (ecmc *EntClipMetadataCreate) createSpec() (*EntClipMetadata, *sqlgraph.Cre
 		_node = &EntClipMetadata{config: ecmc.config}
 		_spec = sqlgraph.NewCreateSpec(entclipmetadata.Table, sqlgraph.NewFieldSpec(entclipmetadata.FieldID, field.TypeInt))
 	)
-	if value, ok := ecmc.mutation.JobID(); ok {
-		_spec.SetField(entclipmetadata.FieldJobID, field.TypeString, value)
-		_node.JobID = value
-	}
 	if value, ok := ecmc.mutation.Filename(); ok {
 		_spec.SetField(entclipmetadata.FieldFilename, field.TypeString, value)
 		_node.Filename = value
@@ -219,10 +180,6 @@ func (ecmc *EntClipMetadataCreate) createSpec() (*EntClipMetadata, *sqlgraph.Cre
 	if value, ok := ecmc.mutation.Format(); ok {
 		_spec.SetField(entclipmetadata.FieldFormat, field.TypeString, value)
 		_node.Format = value
-	}
-	if value, ok := ecmc.mutation.Resolution(); ok {
-		_spec.SetField(entclipmetadata.FieldResolution, field.TypeString, value)
-		_node.Resolution = value
 	}
 	return _node, _spec
 }

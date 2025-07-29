@@ -13,22 +13,22 @@ import (
 
 // Node is the resolver for the node field.
 func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
-	return r.client.Noder(ctx, id)
+	return r.Client.Noder(ctx, id)
 }
 
 // Nodes is the resolver for the nodes field.
 func (r *queryResolver) Nodes(ctx context.Context, ids []int) ([]ent.Noder, error) {
-	return r.client.Noders(ctx, ids)
+	return r.Client.Noders(ctx, ids)
 }
 
 // EntClipMetadataSlice is the resolver for the entClipMetadataSlice field.
-func (r *queryResolver) EntClipMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int) (*ent.EntClipMetadataConnection, error) {
-	return r.client.EntClipMetadata.Query().Paginate(ctx, after, first, before, last)
+func (r *queryResolver) EntClipMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.EntClipMetadataWhereInput) (*ent.EntClipMetadataConnection, error) {
+	return r.Client.EntClipMetadata.Query().Paginate(ctx, after, first, before, last, ent.WithEntClipMetadataFilter(where.Filter))
 }
 
 // EntVideoMetadataSlice is the resolver for the entVideoMetadataSlice field.
-func (r *queryResolver) EntVideoMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int) (*ent.EntVideoMetadataConnection, error) {
-	return r.client.EntVideoMetadata.Query().Paginate(ctx, after, first, before, last)
+func (r *queryResolver) EntVideoMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.EntVideoMetadataWhereInput) (*ent.EntVideoMetadataConnection, error) {
+	return r.Client.EntVideoMetadata.Query().Paginate(ctx, after, first, before, last)
 }
 
 // Query returns QueryResolver implementation.

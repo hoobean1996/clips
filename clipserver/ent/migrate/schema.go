@@ -11,13 +11,11 @@ var (
 	// EntClipMetadataColumns holds the columns for the "ent_clip_metadata" table.
 	EntClipMetadataColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "job_id", Type: field.TypeString},
 		{Name: "filename", Type: field.TypeString},
 		{Name: "file_url", Type: field.TypeString},
 		{Name: "file_size", Type: field.TypeInt64},
 		{Name: "duration", Type: field.TypeInt},
 		{Name: "format", Type: field.TypeString, Default: "mp4"},
-		{Name: "resolution", Type: field.TypeString, Default: "720p"},
 	}
 	// EntClipMetadataTable holds the schema information for the "ent_clip_metadata" table.
 	EntClipMetadataTable = &schema.Table{

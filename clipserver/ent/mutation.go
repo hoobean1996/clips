@@ -34,7 +34,6 @@ type EntClipMetadataMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	job_id        *string
 	filename      *string
 	file_url      *string
 	file_size     *int64
@@ -42,7 +41,6 @@ type EntClipMetadataMutation struct {
 	duration      *int
 	addduration   *int
 	format        *string
-	resolution    *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*EntClipMetadata, error)
@@ -145,42 +143,6 @@ func (m *EntClipMetadataMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetJobID sets the "job_id" field.
-func (m *EntClipMetadataMutation) SetJobID(s string) {
-	m.job_id = &s
-}
-
-// JobID returns the value of the "job_id" field in the mutation.
-func (m *EntClipMetadataMutation) JobID() (r string, exists bool) {
-	v := m.job_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldJobID returns the old "job_id" field's value of the EntClipMetadata entity.
-// If the EntClipMetadata object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EntClipMetadataMutation) OldJobID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldJobID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldJobID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldJobID: %w", err)
-	}
-	return oldValue.JobID, nil
-}
-
-// ResetJobID resets all changes to the "job_id" field.
-func (m *EntClipMetadataMutation) ResetJobID() {
-	m.job_id = nil
 }
 
 // SetFilename sets the "filename" field.
@@ -403,42 +365,6 @@ func (m *EntClipMetadataMutation) ResetFormat() {
 	m.format = nil
 }
 
-// SetResolution sets the "resolution" field.
-func (m *EntClipMetadataMutation) SetResolution(s string) {
-	m.resolution = &s
-}
-
-// Resolution returns the value of the "resolution" field in the mutation.
-func (m *EntClipMetadataMutation) Resolution() (r string, exists bool) {
-	v := m.resolution
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldResolution returns the old "resolution" field's value of the EntClipMetadata entity.
-// If the EntClipMetadata object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EntClipMetadataMutation) OldResolution(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldResolution is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldResolution requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldResolution: %w", err)
-	}
-	return oldValue.Resolution, nil
-}
-
-// ResetResolution resets all changes to the "resolution" field.
-func (m *EntClipMetadataMutation) ResetResolution() {
-	m.resolution = nil
-}
-
 // Where appends a list predicates to the EntClipMetadataMutation builder.
 func (m *EntClipMetadataMutation) Where(ps ...predicate.EntClipMetadata) {
 	m.predicates = append(m.predicates, ps...)
@@ -473,10 +399,7 @@ func (m *EntClipMetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EntClipMetadataMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.job_id != nil {
-		fields = append(fields, entclipmetadata.FieldJobID)
-	}
+	fields := make([]string, 0, 5)
 	if m.filename != nil {
 		fields = append(fields, entclipmetadata.FieldFilename)
 	}
@@ -492,9 +415,6 @@ func (m *EntClipMetadataMutation) Fields() []string {
 	if m.format != nil {
 		fields = append(fields, entclipmetadata.FieldFormat)
 	}
-	if m.resolution != nil {
-		fields = append(fields, entclipmetadata.FieldResolution)
-	}
 	return fields
 }
 
@@ -503,8 +423,6 @@ func (m *EntClipMetadataMutation) Fields() []string {
 // schema.
 func (m *EntClipMetadataMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case entclipmetadata.FieldJobID:
-		return m.JobID()
 	case entclipmetadata.FieldFilename:
 		return m.Filename()
 	case entclipmetadata.FieldFileURL:
@@ -515,8 +433,6 @@ func (m *EntClipMetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.Duration()
 	case entclipmetadata.FieldFormat:
 		return m.Format()
-	case entclipmetadata.FieldResolution:
-		return m.Resolution()
 	}
 	return nil, false
 }
@@ -526,8 +442,6 @@ func (m *EntClipMetadataMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *EntClipMetadataMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case entclipmetadata.FieldJobID:
-		return m.OldJobID(ctx)
 	case entclipmetadata.FieldFilename:
 		return m.OldFilename(ctx)
 	case entclipmetadata.FieldFileURL:
@@ -538,8 +452,6 @@ func (m *EntClipMetadataMutation) OldField(ctx context.Context, name string) (en
 		return m.OldDuration(ctx)
 	case entclipmetadata.FieldFormat:
 		return m.OldFormat(ctx)
-	case entclipmetadata.FieldResolution:
-		return m.OldResolution(ctx)
 	}
 	return nil, fmt.Errorf("unknown EntClipMetadata field %s", name)
 }
@@ -549,13 +461,6 @@ func (m *EntClipMetadataMutation) OldField(ctx context.Context, name string) (en
 // type.
 func (m *EntClipMetadataMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case entclipmetadata.FieldJobID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetJobID(v)
-		return nil
 	case entclipmetadata.FieldFilename:
 		v, ok := value.(string)
 		if !ok {
@@ -590,13 +495,6 @@ func (m *EntClipMetadataMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFormat(v)
-		return nil
-	case entclipmetadata.FieldResolution:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetResolution(v)
 		return nil
 	}
 	return fmt.Errorf("unknown EntClipMetadata field %s", name)
@@ -674,9 +572,6 @@ func (m *EntClipMetadataMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *EntClipMetadataMutation) ResetField(name string) error {
 	switch name {
-	case entclipmetadata.FieldJobID:
-		m.ResetJobID()
-		return nil
 	case entclipmetadata.FieldFilename:
 		m.ResetFilename()
 		return nil
@@ -691,9 +586,6 @@ func (m *EntClipMetadataMutation) ResetField(name string) error {
 		return nil
 	case entclipmetadata.FieldFormat:
 		m.ResetFormat()
-		return nil
-	case entclipmetadata.FieldResolution:
-		m.ResetResolution()
 		return nil
 	}
 	return fmt.Errorf("unknown EntClipMetadata field %s", name)

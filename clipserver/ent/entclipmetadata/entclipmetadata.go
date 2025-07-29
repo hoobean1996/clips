@@ -11,8 +11,6 @@ const (
 	Label = "ent_clip_metadata"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldJobID holds the string denoting the job_id field in the database.
-	FieldJobID = "job_id"
 	// FieldFilename holds the string denoting the filename field in the database.
 	FieldFilename = "filename"
 	// FieldFileURL holds the string denoting the file_url field in the database.
@@ -23,8 +21,6 @@ const (
 	FieldDuration = "duration"
 	// FieldFormat holds the string denoting the format field in the database.
 	FieldFormat = "format"
-	// FieldResolution holds the string denoting the resolution field in the database.
-	FieldResolution = "resolution"
 	// Table holds the table name of the entclipmetadata in the database.
 	Table = "ent_clip_metadata"
 )
@@ -32,13 +28,11 @@ const (
 // Columns holds all SQL columns for entclipmetadata fields.
 var Columns = []string{
 	FieldID,
-	FieldJobID,
 	FieldFilename,
 	FieldFileURL,
 	FieldFileSize,
 	FieldDuration,
 	FieldFormat,
-	FieldResolution,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -52,8 +46,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// JobIDValidator is a validator for the "job_id" field. It is called by the builders before save.
-	JobIDValidator func(string) error
 	// FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
 	FilenameValidator func(string) error
 	// FileURLValidator is a validator for the "file_url" field. It is called by the builders before save.
@@ -64,8 +56,6 @@ var (
 	DurationValidator func(int) error
 	// DefaultFormat holds the default value on creation for the "format" field.
 	DefaultFormat string
-	// DefaultResolution holds the default value on creation for the "resolution" field.
-	DefaultResolution string
 )
 
 // OrderOption defines the ordering options for the EntClipMetadata queries.
@@ -74,11 +64,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByJobID orders the results by the job_id field.
-func ByJobID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldJobID, opts...).ToFunc()
 }
 
 // ByFilename orders the results by the filename field.
@@ -104,9 +89,4 @@ func ByDuration(opts ...sql.OrderTermOption) OrderOption {
 // ByFormat orders the results by the format field.
 func ByFormat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFormat, opts...).ToFunc()
-}
-
-// ByResolution orders the results by the resolution field.
-func ByResolution(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldResolution, opts...).ToFunc()
 }

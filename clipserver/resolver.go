@@ -9,7 +9,7 @@ import (
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type Resolver struct{ client *ent.Client }
+type Resolver struct{ Client *ent.Client }
 
 func NewSchema(client *ent.Client) graphql.ExecutableSchema {
 	return NewExecutableSchema(Config{

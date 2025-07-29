@@ -31,11 +31,6 @@ func (ecm *EntClipMetadataQuery) collectField(ctx context.Context, oneNode bool,
 	)
 	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
-		case "jobID":
-			if _, ok := fieldSeen[entclipmetadata.FieldJobID]; !ok {
-				selectedFields = append(selectedFields, entclipmetadata.FieldJobID)
-				fieldSeen[entclipmetadata.FieldJobID] = struct{}{}
-			}
 		case "filename":
 			if _, ok := fieldSeen[entclipmetadata.FieldFilename]; !ok {
 				selectedFields = append(selectedFields, entclipmetadata.FieldFilename)
@@ -60,11 +55,6 @@ func (ecm *EntClipMetadataQuery) collectField(ctx context.Context, oneNode bool,
 			if _, ok := fieldSeen[entclipmetadata.FieldFormat]; !ok {
 				selectedFields = append(selectedFields, entclipmetadata.FieldFormat)
 				fieldSeen[entclipmetadata.FieldFormat] = struct{}{}
-			}
-		case "resolution":
-			if _, ok := fieldSeen[entclipmetadata.FieldResolution]; !ok {
-				selectedFields = append(selectedFields, entclipmetadata.FieldResolution)
-				fieldSeen[entclipmetadata.FieldResolution] = struct{}{}
 			}
 		case "id":
 		case "__typename":
@@ -100,6 +90,9 @@ func newEntClipMetadataPaginateArgs(rv map[string]any) *entclipmetadataPaginateA
 	}
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*EntClipMetadataWhereInput); ok {
+		args.opts = append(args.opts, WithEntClipMetadataFilter(v.Filter))
 	}
 	return args
 }
@@ -179,6 +172,9 @@ func newEntVideoMetadataPaginateArgs(rv map[string]any) *entvideometadataPaginat
 	}
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[whereField].(*EntVideoMetadataWhereInput); ok {
+		args.opts = append(args.opts, WithEntVideoMetadataFilter(v.Filter))
 	}
 	return args
 }

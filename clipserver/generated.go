@@ -49,14 +49,12 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	EntClipMetadata struct {
-		Duration   func(childComplexity int) int
-		FileSize   func(childComplexity int) int
-		FileURL    func(childComplexity int) int
-		Filename   func(childComplexity int) int
-		Format     func(childComplexity int) int
-		ID         func(childComplexity int) int
-		JobID      func(childComplexity int) int
-		Resolution func(childComplexity int) int
+		Duration func(childComplexity int) int
+		FileSize func(childComplexity int) int
+		FileURL  func(childComplexity int) int
+		Filename func(childComplexity int) int
+		Format   func(childComplexity int) int
+		ID       func(childComplexity int) int
 	}
 
 	EntClipMetadataConnection struct {
@@ -107,8 +105,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		EntClipMetadataSlice  func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int) int
-		EntVideoMetadataSlice func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int) int
+		EntClipMetadataSlice  func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.EntClipMetadataWhereInput) int
+		EntVideoMetadataSlice func(childComplexity int, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.EntVideoMetadataWhereInput) int
 		Node                  func(childComplexity int, id int) int
 		Nodes                 func(childComplexity int, ids []int) int
 	}
@@ -120,8 +118,8 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Node(ctx context.Context, id int) (ent.Noder, error)
 	Nodes(ctx context.Context, ids []int) ([]ent.Noder, error)
-	EntClipMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int) (*ent.EntClipMetadataConnection, error)
-	EntVideoMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int) (*ent.EntVideoMetadataConnection, error)
+	EntClipMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.EntClipMetadataWhereInput) (*ent.EntClipMetadataConnection, error)
+	EntVideoMetadataSlice(ctx context.Context, after *entgql.Cursor[int], first *int, before *entgql.Cursor[int], last *int, where *ent.EntVideoMetadataWhereInput) (*ent.EntVideoMetadataConnection, error)
 }
 
 type executableSchema struct {
@@ -184,20 +182,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.EntClipMetadata.ID(childComplexity), true
-
-	case "EntClipMetadata.jobID":
-		if e.complexity.EntClipMetadata.JobID == nil {
-			break
-		}
-
-		return e.complexity.EntClipMetadata.JobID(childComplexity), true
-
-	case "EntClipMetadata.resolution":
-		if e.complexity.EntClipMetadata.Resolution == nil {
-			break
-		}
-
-		return e.complexity.EntClipMetadata.Resolution(childComplexity), true
 
 	case "EntClipMetadataConnection.edges":
 		if e.complexity.EntClipMetadataConnection.Edges == nil {
@@ -375,7 +359,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EntClipMetadataSlice(childComplexity, args["after"].(*entgql.Cursor[int]), args["first"].(*int), args["before"].(*entgql.Cursor[int]), args["last"].(*int)), true
+		return e.complexity.Query.EntClipMetadataSlice(childComplexity, args["after"].(*entgql.Cursor[int]), args["first"].(*int), args["before"].(*entgql.Cursor[int]), args["last"].(*int), args["where"].(*ent.EntClipMetadataWhereInput)), true
 
 	case "Query.entVideoMetadataSlice":
 		if e.complexity.Query.EntVideoMetadataSlice == nil {
@@ -387,7 +371,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EntVideoMetadataSlice(childComplexity, args["after"].(*entgql.Cursor[int]), args["first"].(*int), args["before"].(*entgql.Cursor[int]), args["last"].(*int)), true
+		return e.complexity.Query.EntVideoMetadataSlice(childComplexity, args["after"].(*entgql.Cursor[int]), args["first"].(*int), args["before"].(*entgql.Cursor[int]), args["last"].(*int), args["where"].(*ent.EntVideoMetadataWhereInput)), true
 
 	case "Query.node":
 		if e.complexity.Query.Node == nil {
@@ -420,7 +404,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputEntClipMetadataWhereInput,
+		ec.unmarshalInputEntVideoMetadataWhereInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -616,6 +603,11 @@ func (ec *executionContext) field_Query_entClipMetadataSlice_args(ctx context.Co
 		return nil, err
 	}
 	args["last"] = arg3
+	arg4, err := ec.field_Query_entClipMetadataSlice_argsWhere(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["where"] = arg4
 	return args, nil
 }
 func (ec *executionContext) field_Query_entClipMetadataSlice_argsAfter(
@@ -690,6 +682,24 @@ func (ec *executionContext) field_Query_entClipMetadataSlice_argsLast(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_entClipMetadataSlice_argsWhere(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*ent.EntClipMetadataWhereInput, error) {
+	if _, ok := rawArgs["where"]; !ok {
+		var zeroVal *ent.EntClipMetadataWhereInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+	if tmp, ok := rawArgs["where"]; ok {
+		return ec.unmarshalOEntClipMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInput(ctx, tmp)
+	}
+
+	var zeroVal *ent.EntClipMetadataWhereInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_entVideoMetadataSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -713,6 +723,11 @@ func (ec *executionContext) field_Query_entVideoMetadataSlice_args(ctx context.C
 		return nil, err
 	}
 	args["last"] = arg3
+	arg4, err := ec.field_Query_entVideoMetadataSlice_argsWhere(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["where"] = arg4
 	return args, nil
 }
 func (ec *executionContext) field_Query_entVideoMetadataSlice_argsAfter(
@@ -784,6 +799,24 @@ func (ec *executionContext) field_Query_entVideoMetadataSlice_argsLast(
 	}
 
 	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_entVideoMetadataSlice_argsWhere(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*ent.EntVideoMetadataWhereInput, error) {
+	if _, ok := rawArgs["where"]; !ok {
+		var zeroVal *ent.EntVideoMetadataWhereInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("where"))
+	if tmp, ok := rawArgs["where"]; ok {
+		return ec.unmarshalOEntVideoMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInput(ctx, tmp)
+	}
+
+	var zeroVal *ent.EntVideoMetadataWhereInput
 	return zeroVal, nil
 }
 
@@ -1002,50 +1035,6 @@ func (ec *executionContext) fieldContext_EntClipMetadata_id(_ context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _EntClipMetadata_jobID(ctx context.Context, field graphql.CollectedField, obj *ent.EntClipMetadata) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EntClipMetadata_jobID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.JobID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EntClipMetadata_jobID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EntClipMetadata",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1271,50 +1260,6 @@ func (ec *executionContext) fieldContext_EntClipMetadata_format(_ context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _EntClipMetadata_resolution(ctx context.Context, field graphql.CollectedField, obj *ent.EntClipMetadata) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EntClipMetadata_resolution(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Resolution, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_EntClipMetadata_resolution(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "EntClipMetadata",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _EntClipMetadataConnection_edges(ctx context.Context, field graphql.CollectedField, obj *ent.EntClipMetadataConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EntClipMetadataConnection_edges(ctx, field)
 	if err != nil {
@@ -1498,8 +1443,6 @@ func (ec *executionContext) fieldContext_EntClipMetadataEdge_node(_ context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_EntClipMetadata_id(ctx, field)
-			case "jobID":
-				return ec.fieldContext_EntClipMetadata_jobID(ctx, field)
 			case "filename":
 				return ec.fieldContext_EntClipMetadata_filename(ctx, field)
 			case "fileURL":
@@ -1510,8 +1453,6 @@ func (ec *executionContext) fieldContext_EntClipMetadataEdge_node(_ context.Cont
 				return ec.fieldContext_EntClipMetadata_duration(ctx, field)
 			case "format":
 				return ec.fieldContext_EntClipMetadata_format(ctx, field)
-			case "resolution":
-				return ec.fieldContext_EntClipMetadata_resolution(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EntClipMetadata", field.Name)
 		},
@@ -2511,7 +2452,7 @@ func (ec *executionContext) _Query_entClipMetadataSlice(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EntClipMetadataSlice(rctx, fc.Args["after"].(*entgql.Cursor[int]), fc.Args["first"].(*int), fc.Args["before"].(*entgql.Cursor[int]), fc.Args["last"].(*int))
+		return ec.resolvers.Query().EntClipMetadataSlice(rctx, fc.Args["after"].(*entgql.Cursor[int]), fc.Args["first"].(*int), fc.Args["before"].(*entgql.Cursor[int]), fc.Args["last"].(*int), fc.Args["where"].(*ent.EntClipMetadataWhereInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2574,7 +2515,7 @@ func (ec *executionContext) _Query_entVideoMetadataSlice(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EntVideoMetadataSlice(rctx, fc.Args["after"].(*entgql.Cursor[int]), fc.Args["first"].(*int), fc.Args["before"].(*entgql.Cursor[int]), fc.Args["last"].(*int))
+		return ec.resolvers.Query().EntVideoMetadataSlice(rctx, fc.Args["after"].(*entgql.Cursor[int]), fc.Args["first"].(*int), fc.Args["before"].(*entgql.Cursor[int]), fc.Args["last"].(*int), fc.Args["where"].(*ent.EntVideoMetadataWhereInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4705,6 +4646,914 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputEntClipMetadataWhereInput(ctx context.Context, obj any) (ent.EntClipMetadataWhereInput, error) {
+	var it ent.EntClipMetadataWhereInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "filename", "filenameNEQ", "filenameIn", "filenameNotIn", "filenameGT", "filenameGTE", "filenameLT", "filenameLTE", "filenameContains", "filenameHasPrefix", "filenameHasSuffix", "filenameEqualFold", "filenameContainsFold", "fileURL", "fileURLNEQ", "fileURLIn", "fileURLNotIn", "fileURLGT", "fileURLGTE", "fileURLLT", "fileURLLTE", "fileURLContains", "fileURLHasPrefix", "fileURLHasSuffix", "fileURLEqualFold", "fileURLContainsFold", "fileSize", "fileSizeNEQ", "fileSizeIn", "fileSizeNotIn", "fileSizeGT", "fileSizeGTE", "fileSizeLT", "fileSizeLTE", "duration", "durationNEQ", "durationIn", "durationNotIn", "durationGT", "durationGTE", "durationLT", "durationLTE", "format", "formatNEQ", "formatIn", "formatNotIn", "formatGT", "formatGTE", "formatLT", "formatLTE", "formatContains", "formatHasPrefix", "formatHasSuffix", "formatEqualFold", "formatContainsFold"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOEntClipMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOEntClipMetadataWhereInput2ᚕᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOEntClipMetadataWhereInput2ᚕᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "idNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNEQ = data
+		case "idIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDIn = data
+		case "idNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNotIn = data
+		case "idGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGT = data
+		case "idGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGTE = data
+		case "idLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLT = data
+		case "idLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLTE = data
+		case "filename":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filename"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filename = data
+		case "filenameNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameNEQ = data
+		case "filenameIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameIn = data
+		case "filenameNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameNotIn = data
+		case "filenameGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameGT = data
+		case "filenameGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameGTE = data
+		case "filenameLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameLT = data
+		case "filenameLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameLTE = data
+		case "filenameContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameContains = data
+		case "filenameHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameHasPrefix = data
+		case "filenameHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameHasSuffix = data
+		case "filenameEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameEqualFold = data
+		case "filenameContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameContainsFold = data
+		case "fileURL":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURL"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURL = data
+		case "fileURLNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLNEQ = data
+		case "fileURLIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLIn = data
+		case "fileURLNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLNotIn = data
+		case "fileURLGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLGT = data
+		case "fileURLGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLGTE = data
+		case "fileURLLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLLT = data
+		case "fileURLLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLLTE = data
+		case "fileURLContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLContains = data
+		case "fileURLHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLHasPrefix = data
+		case "fileURLHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLHasSuffix = data
+		case "fileURLEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLEqualFold = data
+		case "fileURLContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileURLContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileURLContainsFold = data
+		case "fileSize":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSize"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSize = data
+		case "fileSizeNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeNEQ"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeNEQ = data
+		case "fileSizeIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeIn"))
+			data, err := ec.unmarshalOInt2ᚕint64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeIn = data
+		case "fileSizeNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeNotIn"))
+			data, err := ec.unmarshalOInt2ᚕint64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeNotIn = data
+		case "fileSizeGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeGT"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeGT = data
+		case "fileSizeGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeGTE"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeGTE = data
+		case "fileSizeLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeLT"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeLT = data
+		case "fileSizeLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeLTE"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeLTE = data
+		case "duration":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("duration"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Duration = data
+		case "durationNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationNEQ"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationNEQ = data
+		case "durationIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationIn"))
+			data, err := ec.unmarshalOInt2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationIn = data
+		case "durationNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationNotIn"))
+			data, err := ec.unmarshalOInt2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationNotIn = data
+		case "durationGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationGT"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationGT = data
+		case "durationGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationGTE"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationGTE = data
+		case "durationLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationLT"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationLT = data
+		case "durationLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("durationLTE"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DurationLTE = data
+		case "format":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Format = data
+		case "formatNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatNEQ = data
+		case "formatIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatIn = data
+		case "formatNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatNotIn = data
+		case "formatGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatGT = data
+		case "formatGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatGTE = data
+		case "formatLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatLT = data
+		case "formatLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatLTE = data
+		case "formatContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatContains = data
+		case "formatHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatHasPrefix = data
+		case "formatHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatHasSuffix = data
+		case "formatEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatEqualFold = data
+		case "formatContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formatContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FormatContainsFold = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEntVideoMetadataWhereInput(ctx context.Context, obj any) (ent.EntVideoMetadataWhereInput, error) {
+	var it ent.EntVideoMetadataWhereInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "url", "urlNEQ", "urlIn", "urlNotIn", "urlGT", "urlGTE", "urlLT", "urlLTE", "urlContains", "urlHasPrefix", "urlHasSuffix", "urlEqualFold", "urlContainsFold", "filename", "filenameNEQ", "filenameIn", "filenameNotIn", "filenameGT", "filenameGTE", "filenameLT", "filenameLTE", "filenameContains", "filenameHasPrefix", "filenameHasSuffix", "filenameEqualFold", "filenameContainsFold", "fileSize", "fileSizeNEQ", "fileSizeIn", "fileSizeNotIn", "fileSizeGT", "fileSizeGTE", "fileSizeLT", "fileSizeLTE", "contentType", "contentTypeNEQ", "contentTypeIn", "contentTypeNotIn", "contentTypeGT", "contentTypeGTE", "contentTypeLT", "contentTypeLTE", "contentTypeContains", "contentTypeHasPrefix", "contentTypeHasSuffix", "contentTypeEqualFold", "contentTypeContainsFold"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOEntVideoMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOEntVideoMetadataWhereInput2ᚕᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOEntVideoMetadataWhereInput2ᚕᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInputᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "idNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNEQ"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNEQ = data
+		case "idIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDIn = data
+		case "idNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idNotIn"))
+			data, err := ec.unmarshalOID2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDNotIn = data
+		case "idGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGT = data
+		case "idGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idGTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDGTE = data
+		case "idLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLT"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLT = data
+		case "idLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idLTE"))
+			data, err := ec.unmarshalOID2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IDLTE = data
+		case "url":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("url"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URL = data
+		case "urlNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLNEQ = data
+		case "urlIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLIn = data
+		case "urlNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLNotIn = data
+		case "urlGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLGT = data
+		case "urlGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLGTE = data
+		case "urlLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLLT = data
+		case "urlLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLLTE = data
+		case "urlContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLContains = data
+		case "urlHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLHasPrefix = data
+		case "urlHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLHasSuffix = data
+		case "urlEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLEqualFold = data
+		case "urlContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("urlContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.URLContainsFold = data
+		case "filename":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filename"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filename = data
+		case "filenameNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameNEQ = data
+		case "filenameIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameIn = data
+		case "filenameNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameNotIn = data
+		case "filenameGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameGT = data
+		case "filenameGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameGTE = data
+		case "filenameLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameLT = data
+		case "filenameLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameLTE = data
+		case "filenameContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameContains = data
+		case "filenameHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameHasPrefix = data
+		case "filenameHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameHasSuffix = data
+		case "filenameEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameEqualFold = data
+		case "filenameContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filenameContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FilenameContainsFold = data
+		case "fileSize":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSize"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSize = data
+		case "fileSizeNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeNEQ"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeNEQ = data
+		case "fileSizeIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeIn"))
+			data, err := ec.unmarshalOInt2ᚕint64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeIn = data
+		case "fileSizeNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeNotIn"))
+			data, err := ec.unmarshalOInt2ᚕint64ᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeNotIn = data
+		case "fileSizeGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeGT"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeGT = data
+		case "fileSizeGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeGTE"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeGTE = data
+		case "fileSizeLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeLT"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeLT = data
+		case "fileSizeLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileSizeLTE"))
+			data, err := ec.unmarshalOInt2ᚖint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FileSizeLTE = data
+		case "contentType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentType"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentType = data
+		case "contentTypeNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeNEQ = data
+		case "contentTypeIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeIn = data
+		case "contentTypeNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeNotIn = data
+		case "contentTypeGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeGT = data
+		case "contentTypeGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeGTE = data
+		case "contentTypeLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeLT = data
+		case "contentTypeLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeLTE = data
+		case "contentTypeContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeContains = data
+		case "contentTypeHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeHasPrefix = data
+		case "contentTypeHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeHasSuffix = data
+		case "contentTypeEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeEqualFold = data
+		case "contentTypeContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("contentTypeContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ContentTypeContainsFold = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -4748,11 +5597,6 @@ func (ec *executionContext) _EntClipMetadata(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "jobID":
-			out.Values[i] = ec._EntClipMetadata_jobID(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "filename":
 			out.Values[i] = ec._EntClipMetadata_filename(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4775,11 +5619,6 @@ func (ec *executionContext) _EntClipMetadata(ctx context.Context, sel ast.Select
 			}
 		case "format":
 			out.Values[i] = ec._EntClipMetadata_format(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "resolution":
-			out.Values[i] = ec._EntClipMetadata_resolution(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5695,6 +6534,11 @@ func (ec *executionContext) marshalNEntClipMetadataConnection2ᚖcomᚗgigaboo�
 	return ec._EntClipMetadataConnection(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNEntClipMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInput(ctx context.Context, v any) (*ent.EntClipMetadataWhereInput, error) {
+	res, err := ec.unmarshalInputEntClipMetadataWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNEntVideoMetadataConnection2comᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataConnection(ctx context.Context, sel ast.SelectionSet, v ent.EntVideoMetadataConnection) graphql.Marshaler {
 	return ec._EntVideoMetadataConnection(ctx, sel, &v)
 }
@@ -5707,6 +6551,11 @@ func (ec *executionContext) marshalNEntVideoMetadataConnection2ᚖcomᚗgigaboo�
 		return graphql.Null
 	}
 	return ec._EntVideoMetadataConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNEntVideoMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInput(ctx context.Context, v any) (*ent.EntVideoMetadataWhereInput, error) {
+	res, err := ec.unmarshalInputEntVideoMetadataWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNFile2comᚗgigabooᚋclipserverᚐFile(ctx context.Context, sel ast.SelectionSet, v File) graphql.Marshaler {
@@ -6229,6 +7078,32 @@ func (ec *executionContext) marshalOEntClipMetadataEdge2ᚖcomᚗgigabooᚋclips
 	return ec._EntClipMetadataEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOEntClipMetadataWhereInput2ᚕᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInputᚄ(ctx context.Context, v any) ([]*ent.EntClipMetadataWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*ent.EntClipMetadataWhereInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNEntClipMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOEntClipMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntClipMetadataWhereInput(ctx context.Context, v any) (*ent.EntClipMetadataWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputEntClipMetadataWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOEntVideoMetadata2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadata(ctx context.Context, sel ast.SelectionSet, v *ent.EntVideoMetadata) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -6284,6 +7159,158 @@ func (ec *executionContext) marshalOEntVideoMetadataEdge2ᚖcomᚗgigabooᚋclip
 	return ec._EntVideoMetadataEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOEntVideoMetadataWhereInput2ᚕᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInputᚄ(ctx context.Context, v any) ([]*ent.EntVideoMetadataWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]*ent.EntVideoMetadataWhereInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNEntVideoMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOEntVideoMetadataWhereInput2ᚖcomᚗgigabooᚋclipserverᚋentᚐEntVideoMetadataWhereInput(ctx context.Context, v any) (*ent.EntVideoMetadataWhereInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputEntVideoMetadataWhereInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOID2ᚕintᚄ(ctx context.Context, v any) ([]int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNID2int(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOID2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNID2int(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOID2ᚖint(ctx context.Context, v any) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalIntID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalIntID(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕint64ᚄ(ctx context.Context, v any) ([]int64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]int64, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2int64(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕint64ᚄ(ctx context.Context, sel ast.SelectionSet, v []int64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2int64(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕintᚄ(ctx context.Context, v any) ([]int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -6299,6 +7326,24 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalInt(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v any) (*int64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt64(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt64(*v)
 	return res
 }
 

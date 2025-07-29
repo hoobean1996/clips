@@ -27,20 +27,6 @@ func (ecmu *EntClipMetadataUpdate) Where(ps ...predicate.EntClipMetadata) *EntCl
 	return ecmu
 }
 
-// SetJobID sets the "job_id" field.
-func (ecmu *EntClipMetadataUpdate) SetJobID(s string) *EntClipMetadataUpdate {
-	ecmu.mutation.SetJobID(s)
-	return ecmu
-}
-
-// SetNillableJobID sets the "job_id" field if the given value is not nil.
-func (ecmu *EntClipMetadataUpdate) SetNillableJobID(s *string) *EntClipMetadataUpdate {
-	if s != nil {
-		ecmu.SetJobID(*s)
-	}
-	return ecmu
-}
-
 // SetFilename sets the "filename" field.
 func (ecmu *EntClipMetadataUpdate) SetFilename(s string) *EntClipMetadataUpdate {
 	ecmu.mutation.SetFilename(s)
@@ -125,20 +111,6 @@ func (ecmu *EntClipMetadataUpdate) SetNillableFormat(s *string) *EntClipMetadata
 	return ecmu
 }
 
-// SetResolution sets the "resolution" field.
-func (ecmu *EntClipMetadataUpdate) SetResolution(s string) *EntClipMetadataUpdate {
-	ecmu.mutation.SetResolution(s)
-	return ecmu
-}
-
-// SetNillableResolution sets the "resolution" field if the given value is not nil.
-func (ecmu *EntClipMetadataUpdate) SetNillableResolution(s *string) *EntClipMetadataUpdate {
-	if s != nil {
-		ecmu.SetResolution(*s)
-	}
-	return ecmu
-}
-
 // Mutation returns the EntClipMetadataMutation object of the builder.
 func (ecmu *EntClipMetadataUpdate) Mutation() *EntClipMetadataMutation {
 	return ecmu.mutation
@@ -173,11 +145,6 @@ func (ecmu *EntClipMetadataUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ecmu *EntClipMetadataUpdate) check() error {
-	if v, ok := ecmu.mutation.JobID(); ok {
-		if err := entclipmetadata.JobIDValidator(v); err != nil {
-			return &ValidationError{Name: "job_id", err: fmt.Errorf(`ent: validator failed for field "EntClipMetadata.job_id": %w`, err)}
-		}
-	}
 	if v, ok := ecmu.mutation.Filename(); ok {
 		if err := entclipmetadata.FilenameValidator(v); err != nil {
 			return &ValidationError{Name: "filename", err: fmt.Errorf(`ent: validator failed for field "EntClipMetadata.filename": %w`, err)}
@@ -213,9 +180,6 @@ func (ecmu *EntClipMetadataUpdate) sqlSave(ctx context.Context) (n int, err erro
 			}
 		}
 	}
-	if value, ok := ecmu.mutation.JobID(); ok {
-		_spec.SetField(entclipmetadata.FieldJobID, field.TypeString, value)
-	}
 	if value, ok := ecmu.mutation.Filename(); ok {
 		_spec.SetField(entclipmetadata.FieldFilename, field.TypeString, value)
 	}
@@ -237,9 +201,6 @@ func (ecmu *EntClipMetadataUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if value, ok := ecmu.mutation.Format(); ok {
 		_spec.SetField(entclipmetadata.FieldFormat, field.TypeString, value)
 	}
-	if value, ok := ecmu.mutation.Resolution(); ok {
-		_spec.SetField(entclipmetadata.FieldResolution, field.TypeString, value)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ecmu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{entclipmetadata.Label}
@@ -258,20 +219,6 @@ type EntClipMetadataUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *EntClipMetadataMutation
-}
-
-// SetJobID sets the "job_id" field.
-func (ecmuo *EntClipMetadataUpdateOne) SetJobID(s string) *EntClipMetadataUpdateOne {
-	ecmuo.mutation.SetJobID(s)
-	return ecmuo
-}
-
-// SetNillableJobID sets the "job_id" field if the given value is not nil.
-func (ecmuo *EntClipMetadataUpdateOne) SetNillableJobID(s *string) *EntClipMetadataUpdateOne {
-	if s != nil {
-		ecmuo.SetJobID(*s)
-	}
-	return ecmuo
 }
 
 // SetFilename sets the "filename" field.
@@ -358,20 +305,6 @@ func (ecmuo *EntClipMetadataUpdateOne) SetNillableFormat(s *string) *EntClipMeta
 	return ecmuo
 }
 
-// SetResolution sets the "resolution" field.
-func (ecmuo *EntClipMetadataUpdateOne) SetResolution(s string) *EntClipMetadataUpdateOne {
-	ecmuo.mutation.SetResolution(s)
-	return ecmuo
-}
-
-// SetNillableResolution sets the "resolution" field if the given value is not nil.
-func (ecmuo *EntClipMetadataUpdateOne) SetNillableResolution(s *string) *EntClipMetadataUpdateOne {
-	if s != nil {
-		ecmuo.SetResolution(*s)
-	}
-	return ecmuo
-}
-
 // Mutation returns the EntClipMetadataMutation object of the builder.
 func (ecmuo *EntClipMetadataUpdateOne) Mutation() *EntClipMetadataMutation {
 	return ecmuo.mutation
@@ -419,11 +352,6 @@ func (ecmuo *EntClipMetadataUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ecmuo *EntClipMetadataUpdateOne) check() error {
-	if v, ok := ecmuo.mutation.JobID(); ok {
-		if err := entclipmetadata.JobIDValidator(v); err != nil {
-			return &ValidationError{Name: "job_id", err: fmt.Errorf(`ent: validator failed for field "EntClipMetadata.job_id": %w`, err)}
-		}
-	}
 	if v, ok := ecmuo.mutation.Filename(); ok {
 		if err := entclipmetadata.FilenameValidator(v); err != nil {
 			return &ValidationError{Name: "filename", err: fmt.Errorf(`ent: validator failed for field "EntClipMetadata.filename": %w`, err)}
@@ -476,9 +404,6 @@ func (ecmuo *EntClipMetadataUpdateOne) sqlSave(ctx context.Context) (_node *EntC
 			}
 		}
 	}
-	if value, ok := ecmuo.mutation.JobID(); ok {
-		_spec.SetField(entclipmetadata.FieldJobID, field.TypeString, value)
-	}
 	if value, ok := ecmuo.mutation.Filename(); ok {
 		_spec.SetField(entclipmetadata.FieldFilename, field.TypeString, value)
 	}
@@ -499,9 +424,6 @@ func (ecmuo *EntClipMetadataUpdateOne) sqlSave(ctx context.Context) (_node *EntC
 	}
 	if value, ok := ecmuo.mutation.Format(); ok {
 		_spec.SetField(entclipmetadata.FieldFormat, field.TypeString, value)
-	}
-	if value, ok := ecmuo.mutation.Resolution(); ok {
-		_spec.SetField(entclipmetadata.FieldResolution, field.TypeString, value)
 	}
 	_node = &EntClipMetadata{config: ecmuo.config}
 	_spec.Assign = _node.assignValues

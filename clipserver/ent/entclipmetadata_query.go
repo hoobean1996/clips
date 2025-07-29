@@ -264,12 +264,12 @@ func (ecmq *EntClipMetadataQuery) Clone() *EntClipMetadataQuery {
 // Example:
 //
 //	var v []struct {
-//		JobID string `json:"job_id,omitempty"`
+//		Filename string `json:"filename,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.EntClipMetadata.Query().
-//		GroupBy(entclipmetadata.FieldJobID).
+//		GroupBy(entclipmetadata.FieldFilename).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ecmq *EntClipMetadataQuery) GroupBy(field string, fields ...string) *EntClipMetadataGroupBy {
@@ -287,11 +287,11 @@ func (ecmq *EntClipMetadataQuery) GroupBy(field string, fields ...string) *EntCl
 // Example:
 //
 //	var v []struct {
-//		JobID string `json:"job_id,omitempty"`
+//		Filename string `json:"filename,omitempty"`
 //	}
 //
 //	client.EntClipMetadata.Query().
-//		Select(entclipmetadata.FieldJobID).
+//		Select(entclipmetadata.FieldFilename).
 //		Scan(ctx, &v)
 func (ecmq *EntClipMetadataQuery) Select(fields ...string) *EntClipMetadataSelect {
 	ecmq.ctx.Fields = append(ecmq.ctx.Fields, fields...)

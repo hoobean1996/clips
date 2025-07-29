@@ -16,8 +16,6 @@ type EntClipMetadata struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// 关联的剪辑任务ID
-	JobID string `json:"job_id,omitempty"`
 	// 剪辑文件名
 	Filename string `json:"filename,omitempty"`
 	// 剪辑文件访问地址
@@ -27,9 +25,7 @@ type EntClipMetadata struct {
 	// 视频时长（秒）
 	Duration int `json:"duration,omitempty"`
 	// 视频格式
-	Format string `json:"format,omitempty"`
-	// 视频分辨率
-	Resolution   string `json:"resolution,omitempty"`
+	Format       string `json:"format,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -40,7 +36,7 @@ func (*EntClipMetadata) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case entclipmetadata.FieldID, entclipmetadata.FieldFileSize, entclipmetadata.FieldDuration:
 			values[i] = new(sql.NullInt64)
-		case entclipmetadata.FieldJobID, entclipmetadata.FieldFilename, entclipmetadata.FieldFileURL, entclipmetadata.FieldFormat, entclipmetadata.FieldResolution:
+		case entclipmetadata.FieldFilename, entclipmetadata.FieldFileURL, entclipmetadata.FieldFormat:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -63,12 +59,6 @@ func (ecm *EntClipMetadata) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			ecm.ID = int(value.Int64)
-		case entclipmetadata.FieldJobID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field job_id", values[i])
-			} else if value.Valid {
-				ecm.JobID = value.String
-			}
 		case entclipmetadata.FieldFilename:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field filename", values[i])
@@ -98,12 +88,6 @@ func (ecm *EntClipMetadata) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field format", values[i])
 			} else if value.Valid {
 				ecm.Format = value.String
-			}
-		case entclipmetadata.FieldResolution:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field resolution", values[i])
-			} else if value.Valid {
-				ecm.Resolution = value.String
 			}
 		default:
 			ecm.selectValues.Set(columns[i], values[i])
@@ -141,9 +125,6 @@ func (ecm *EntClipMetadata) String() string {
 	var builder strings.Builder
 	builder.WriteString("EntClipMetadata(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ecm.ID))
-	builder.WriteString("job_id=")
-	builder.WriteString(ecm.JobID)
-	builder.WriteString(", ")
 	builder.WriteString("filename=")
 	builder.WriteString(ecm.Filename)
 	builder.WriteString(", ")
@@ -158,9 +139,6 @@ func (ecm *EntClipMetadata) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("format=")
 	builder.WriteString(ecm.Format)
-	builder.WriteString(", ")
-	builder.WriteString("resolution=")
-	builder.WriteString(ecm.Resolution)
 	builder.WriteByte(')')
 	return builder.String()
 }

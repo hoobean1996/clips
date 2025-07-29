@@ -1,24 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useState } from "react";
+import ClipResultContainer from "../src/ClipResultContainer";
+import ClipSearch from "./ClipSearch";
 
 function App() {
+  const [query, setQuery] = useState<string>("");
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="flex h-screen overflow-hidden">
+      {/* 左侧搜索区域 */}
+      <div className="w-2/5 flex-shrink-0">
+        <ClipSearch
+          onSearch={(query: string) => {
+            setQuery(query);
+          }}
+        />
+      </div>
+
+      {/* 右侧结果区域 */}
+      <div className="flex-1">
+        <ClipResultContainer query={query} />
+      </div>
     </div>
   );
 }

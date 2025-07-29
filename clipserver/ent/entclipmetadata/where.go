@@ -52,11 +52,6 @@ func IDLTE(id int) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldLTE(FieldID, id))
 }
 
-// JobID applies equality check predicate on the "job_id" field. It's identical to JobIDEQ.
-func JobID(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldEQ(FieldJobID, v))
-}
-
 // Filename applies equality check predicate on the "filename" field. It's identical to FilenameEQ.
 func Filename(v string) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldEQ(FieldFilename, v))
@@ -80,76 +75,6 @@ func Duration(v int) predicate.EntClipMetadata {
 // Format applies equality check predicate on the "format" field. It's identical to FormatEQ.
 func Format(v string) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldEQ(FieldFormat, v))
-}
-
-// Resolution applies equality check predicate on the "resolution" field. It's identical to ResolutionEQ.
-func Resolution(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldEQ(FieldResolution, v))
-}
-
-// JobIDEQ applies the EQ predicate on the "job_id" field.
-func JobIDEQ(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldEQ(FieldJobID, v))
-}
-
-// JobIDNEQ applies the NEQ predicate on the "job_id" field.
-func JobIDNEQ(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldNEQ(FieldJobID, v))
-}
-
-// JobIDIn applies the In predicate on the "job_id" field.
-func JobIDIn(vs ...string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldIn(FieldJobID, vs...))
-}
-
-// JobIDNotIn applies the NotIn predicate on the "job_id" field.
-func JobIDNotIn(vs ...string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldNotIn(FieldJobID, vs...))
-}
-
-// JobIDGT applies the GT predicate on the "job_id" field.
-func JobIDGT(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldGT(FieldJobID, v))
-}
-
-// JobIDGTE applies the GTE predicate on the "job_id" field.
-func JobIDGTE(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldGTE(FieldJobID, v))
-}
-
-// JobIDLT applies the LT predicate on the "job_id" field.
-func JobIDLT(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldLT(FieldJobID, v))
-}
-
-// JobIDLTE applies the LTE predicate on the "job_id" field.
-func JobIDLTE(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldLTE(FieldJobID, v))
-}
-
-// JobIDContains applies the Contains predicate on the "job_id" field.
-func JobIDContains(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldContains(FieldJobID, v))
-}
-
-// JobIDHasPrefix applies the HasPrefix predicate on the "job_id" field.
-func JobIDHasPrefix(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldHasPrefix(FieldJobID, v))
-}
-
-// JobIDHasSuffix applies the HasSuffix predicate on the "job_id" field.
-func JobIDHasSuffix(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldHasSuffix(FieldJobID, v))
-}
-
-// JobIDEqualFold applies the EqualFold predicate on the "job_id" field.
-func JobIDEqualFold(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldEqualFold(FieldJobID, v))
-}
-
-// JobIDContainsFold applies the ContainsFold predicate on the "job_id" field.
-func JobIDContainsFold(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldContainsFold(FieldJobID, v))
 }
 
 // FilenameEQ applies the EQ predicate on the "filename" field.
@@ -425,71 +350,6 @@ func FormatEqualFold(v string) predicate.EntClipMetadata {
 // FormatContainsFold applies the ContainsFold predicate on the "format" field.
 func FormatContainsFold(v string) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldContainsFold(FieldFormat, v))
-}
-
-// ResolutionEQ applies the EQ predicate on the "resolution" field.
-func ResolutionEQ(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldEQ(FieldResolution, v))
-}
-
-// ResolutionNEQ applies the NEQ predicate on the "resolution" field.
-func ResolutionNEQ(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldNEQ(FieldResolution, v))
-}
-
-// ResolutionIn applies the In predicate on the "resolution" field.
-func ResolutionIn(vs ...string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldIn(FieldResolution, vs...))
-}
-
-// ResolutionNotIn applies the NotIn predicate on the "resolution" field.
-func ResolutionNotIn(vs ...string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldNotIn(FieldResolution, vs...))
-}
-
-// ResolutionGT applies the GT predicate on the "resolution" field.
-func ResolutionGT(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldGT(FieldResolution, v))
-}
-
-// ResolutionGTE applies the GTE predicate on the "resolution" field.
-func ResolutionGTE(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldGTE(FieldResolution, v))
-}
-
-// ResolutionLT applies the LT predicate on the "resolution" field.
-func ResolutionLT(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldLT(FieldResolution, v))
-}
-
-// ResolutionLTE applies the LTE predicate on the "resolution" field.
-func ResolutionLTE(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldLTE(FieldResolution, v))
-}
-
-// ResolutionContains applies the Contains predicate on the "resolution" field.
-func ResolutionContains(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldContains(FieldResolution, v))
-}
-
-// ResolutionHasPrefix applies the HasPrefix predicate on the "resolution" field.
-func ResolutionHasPrefix(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldHasPrefix(FieldResolution, v))
-}
-
-// ResolutionHasSuffix applies the HasSuffix predicate on the "resolution" field.
-func ResolutionHasSuffix(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldHasSuffix(FieldResolution, v))
-}
-
-// ResolutionEqualFold applies the EqualFold predicate on the "resolution" field.
-func ResolutionEqualFold(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldEqualFold(FieldResolution, v))
-}
-
-// ResolutionContainsFold applies the ContainsFold predicate on the "resolution" field.
-func ResolutionContainsFold(v string) predicate.EntClipMetadata {
-	return predicate.EntClipMetadata(sql.FieldContainsFold(FieldResolution, v))
 }
 
 // And groups predicates with the AND operator between them.

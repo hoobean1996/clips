@@ -1,75 +1,92 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Suspense, useState, useMemo, useCallback } from "react";
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
+import ClipResultContainerQueryContainer from "../ClipResultGridContainerQueryContainer";
 
 export default function HomeScreen() {
+  const [query, setQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(""); // 用于实际搜索的状态
+
+  // 防抖处理 - 延迟更新搜索查询
+  const updateSearchQuery = useMemo(() => {
+    let timeoutId: number;
+
+    return (newQuery: string) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setSearchQuery(newQuery);
+      }, 300); // 300ms 延迟
+    };
+  }, []);
+
+  // 处理输入变化
+  const handleTextChange = useCallback(
+    (text: string) => {
+      setQuery(text); // 立即更新输入框显示
+      updateSearchQuery(text); // 延迟更新搜索
+    },
+    [updateSearchQuery]
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        {/* 搜索区域 */}
+        <View style={styles.searchSection}>
+          <TextInput
+            style={styles.searchInput}
+            value={query}
+            onChangeText={handleTextChange}
+            placeholder="搜索视频、关键词..."
+            placeholderTextColor="#9CA3AF"
+            returnKeyType="search"
+            autoCapitalize="none"
+            autoCorrect={false}
+            selectTextOnFocus={false}
+            blurOnSubmit={false}
+          />
+        </View>
+
+        {/* 结果区域 */}
+        <Suspense fallback={<ActivityIndicator />}>
+          <View style={styles.resultsSection}>
+            <ClipResultContainerQueryContainer keyword={searchQuery} />
+          </View>
+        </Suspense>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  searchInput: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: "#1F2937",
+    height: 48,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#FAFAFA",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  content: {
+    flex: 1,
+  },
+  searchSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  resultsSection: {
+    flex: 1,
   },
 });

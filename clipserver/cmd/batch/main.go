@@ -91,7 +91,12 @@ func batchProcessVideos(client *ent.Client, path string) {
 		for _, wordClip := range wordClips {
 			err := generateClipAndSave(client, videoFile, wordClip)
 			if err != nil {
-				log.Printf("处理单词剪辑失败 %s: %v", wordClip.Word, err)
+				log.Printf("处理单词mp4剪辑失败 %s: %v", wordClip.Word, err)
+				continue
+			}
+			err = generateh264ClipAndSave(client, videoFile, wordClip)
+			if err != nil {
+				log.Printf("处理单词h264剪辑失败 %s: %v", wordClip.Word, err)
 				continue
 			}
 			log.Printf("成功创建剪辑: %s", wordClip.Filename)
@@ -409,6 +414,74 @@ func generateClipAndSave(client *ent.Client, videoFile string, wordClip WordClip
 		return fmt.Errorf("保存到数据库失败: %v", err)
 	}
 
+	return nil
+}
+
+// 生成H.264编码的视频剪辑并保存到数据库
+func generateh264ClipAndSave(client *ent.Client, videoFile string, wordClip WordClip) error {
+	// 转换时间格式为ffmpeg支持的格式
+	startSeconds := timeToSeconds(wordClip.StartTime)
+	endSeconds := timeToSeconds(wordClip.EndTime)
+
+	// 验证剪辑参数
+	if err := validateClipParams(startSeconds, endSeconds, wordClip.Word); err != nil {
+		return fmt.Errorf("参数验证失败: %v", err)
+	}
+
+	// 格式化为ffmpeg期望的格式 (秒数)
+	startTime := fmt.Sprintf("%.3f", startSeconds)
+	duration := fmt.Sprintf("%.3f", endSeconds-startSeconds)
+
+	log.Printf("剪辑 %s (H.264): 开始时间=%.3fs, 时长=%.3fs", wordClip.Word, startSeconds, endSeconds-startSeconds)
+
+	// 使用ffmpeg生成H.264编码的剪辑，优化移动端兼容性
+	cmd := exec.Command("ffmpeg",
+		"-i", videoFile,
+		"-ss", startTime,
+		"-t", duration,
+		// H.264 编码参数
+		"-c:v", "libx264", // 使用H.264编码器
+		"-profile:v", "main", // 使用main profile (兼容性好)
+		"-level", "4.0", // H.264 level 4.0 (移动端兼容)
+		"-preset", "medium", // 编码速度与质量平衡
+		"-crf", "23", // 恒定质量因子 (18-28, 23是好的平衡点)
+		// 音频编码参数
+		"-c:a", "aac", // AAC音频编码
+		"-b:a", "128k", // 音频码率128k
+		// 移动端优化
+		"-movflags", "+faststart", // 元数据前置，支持边下载边播放
+		"-pix_fmt", "yuv420p", // 像素格式，兼容性最好
+		// 其他参数
+		"-avoid_negative_ts", "make_zero",
+		wordClip.Filename,
+		"-y") // 覆盖已存在文件
+
+	// 捕获错误输出以便调试
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("ffmpeg H.264剪辑失败: %v, 输出: %s", err, string(output))
+	}
+
+	// 获取文件信息
+	fileInfo, err := os.Stat(wordClip.Filename)
+	if err != nil {
+		return fmt.Errorf("获取文件信息失败: %v", err)
+	}
+
+	// 保存到数据库
+	_, err = client.EntClipMetadata.Create().
+		SetFileURL(wordClip.Filename).
+		SetFilename(filepath.Base(wordClip.Filename)).
+		SetFileSize(int64(fileInfo.Size())).
+		SetDuration(int(endSeconds) - int(startSeconds)).
+		SetFormat("mp4").
+		Save(context.Background())
+
+	if err != nil {
+		return fmt.Errorf("保存到数据库失败: %v", err)
+	}
+
+	log.Printf("H.264剪辑生成成功: %s, 文件大小: %d bytes", wordClip.Filename, fileInfo.Size())
 	return nil
 }
 

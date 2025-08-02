@@ -1,0 +1,11 @@
+scalar Upload
+
+type File {
+  name: String!
+  url: String!
+  hash: String!
+}
+
+type Mutation {
+  singleUpload(file: Upload!): File!
+}

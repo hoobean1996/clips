@@ -27,7 +27,7 @@ export default function ClipResultContainerQueryContainer({ keyword }: Props) {
     {
       count: 5,
       where: {
-        filenameContains: keyword,
+        wordContains: keyword,
       },
     },
     { fetchPolicy: "network-only" }

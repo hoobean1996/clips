@@ -25,7 +25,11 @@ type EntClipMetadata struct {
 	// 视频时长（秒）
 	Duration int `json:"duration,omitempty"`
 	// 视频格式
-	Format       string `json:"format,omitempty"`
+	Format string `json:"format,omitempty"`
+	// Word holds the value of the "word" field.
+	Word *string `json:"word,omitempty"`
+	// Sentence holds the value of the "sentence" field.
+	Sentence     *string `json:"sentence,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -36,7 +40,7 @@ func (*EntClipMetadata) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case entclipmetadata.FieldID, entclipmetadata.FieldFileSize, entclipmetadata.FieldDuration:
 			values[i] = new(sql.NullInt64)
-		case entclipmetadata.FieldFilename, entclipmetadata.FieldFileURL, entclipmetadata.FieldFormat:
+		case entclipmetadata.FieldFilename, entclipmetadata.FieldFileURL, entclipmetadata.FieldFormat, entclipmetadata.FieldWord, entclipmetadata.FieldSentence:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -89,6 +93,20 @@ func (ecm *EntClipMetadata) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ecm.Format = value.String
 			}
+		case entclipmetadata.FieldWord:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field word", values[i])
+			} else if value.Valid {
+				ecm.Word = new(string)
+				*ecm.Word = value.String
+			}
+		case entclipmetadata.FieldSentence:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field sentence", values[i])
+			} else if value.Valid {
+				ecm.Sentence = new(string)
+				*ecm.Sentence = value.String
+			}
 		default:
 			ecm.selectValues.Set(columns[i], values[i])
 		}
@@ -139,6 +157,16 @@ func (ecm *EntClipMetadata) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("format=")
 	builder.WriteString(ecm.Format)
+	builder.WriteString(", ")
+	if v := ecm.Word; v != nil {
+		builder.WriteString("word=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := ecm.Sentence; v != nil {
+		builder.WriteString("sentence=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

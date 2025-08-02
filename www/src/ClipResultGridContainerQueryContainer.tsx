@@ -25,7 +25,7 @@ export default function ClipResultContainerQueryContainer({
     {
       count: 5,
       where: {
-        filenameContains: q,
+        wordContains: q,
       },
     },
     { fetchPolicy: "network-only" }

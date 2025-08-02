@@ -56,6 +56,16 @@ func (ecm *EntClipMetadataQuery) collectField(ctx context.Context, oneNode bool,
 				selectedFields = append(selectedFields, entclipmetadata.FieldFormat)
 				fieldSeen[entclipmetadata.FieldFormat] = struct{}{}
 			}
+		case "word":
+			if _, ok := fieldSeen[entclipmetadata.FieldWord]; !ok {
+				selectedFields = append(selectedFields, entclipmetadata.FieldWord)
+				fieldSeen[entclipmetadata.FieldWord] = struct{}{}
+			}
+		case "sentence":
+			if _, ok := fieldSeen[entclipmetadata.FieldSentence]; !ok {
+				selectedFields = append(selectedFields, entclipmetadata.FieldSentence)
+				fieldSeen[entclipmetadata.FieldSentence] = struct{}{}
+			}
 		case "id":
 		case "__typename":
 		default:

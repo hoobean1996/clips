@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3379f488ec7fafd6dcd9baf24e98be4c>>
+ * @generated SignedSource<<62ea7b36b1a1f42c9971eb0fdbcf01c6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -156,6 +156,20 @@ return {
                     "kind": "ScalarField",
                     "name": "format",
                     "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "word",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "sentence",
+                    "storageKey": null
                   }
                 ],
                 "storageKey": null
@@ -169,12 +183,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "6b327b6658f5699c51246b9eabbc3f9c",
+    "cacheID": "76b8eee0b85c3f6f9a4becb8029f6f22",
     "id": null,
     "metadata": {},
     "name": "ClipResultQuery",
     "operationKind": "query",
-    "text": "query ClipResultQuery {\n  entClipMetadataSlice {\n    totalCount\n    edges {\n      node {\n        ...ClipResultCard_clipMetadata\n        id\n      }\n    }\n  }\n}\n\nfragment ClipResultCard_clipMetadata on EntClipMetadata {\n  id\n  filename\n  fileURL\n  fileSize\n  duration\n  format\n}\n"
+    "text": "query ClipResultQuery {\n  entClipMetadataSlice {\n    totalCount\n    edges {\n      node {\n        ...ClipResultCard_clipMetadata\n        id\n      }\n    }\n  }\n}\n\nfragment ClipResultCard_clipMetadata on EntClipMetadata {\n  id\n  filename\n  fileURL\n  fileSize\n  duration\n  format\n  word\n  sentence\n}\n"
   }
 };
 })();

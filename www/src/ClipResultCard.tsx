@@ -10,6 +10,8 @@ const fragment = graphql`
     fileSize
     duration
     format
+    word
+    sentence
   }
 `;
 
@@ -38,24 +40,12 @@ export default function ClipResultCard({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // 从文件名提取单词
-  const extractWordFromFilename = (filename: string) => {
-    // 假设文件名格式：videoname_word_start_end.mp4
-    const parts = filename.split("_");
-    if (parts.length >= 2) {
-      return parts[1]; // 提取单词部分
-    }
-    return filename.replace(/\.[^/.]+$/, ""); // 移除扩展名作为备选
-  };
-
   const handleDownload = () => {
     const link = document.createElement("a");
     link.href = "http://localhost:8081/" + data.fileURL;
     link.download = data.filename;
     link.click();
   };
-
-  const word = extractWordFromFilename(data.filename);
 
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
@@ -123,8 +113,10 @@ export default function ClipResultCard({
       <div className="p-4">
         {/* 单词标题 */}
         <div className="mb-3">
-          <h3 className="text-lg font-bold text-gray-800 mb-1">"{word}"</h3>
-          <p className="text-sm text-gray-500 truncate" title={data.filename}>
+          <h3 className="text-lg font-bold text-gray-800 mb-1">
+            "{data.word}"
+          </h3>
+          <p className="text-sm text-gray-500 truncate" title={data.sentence}>
             {data.filename}
           </p>
         </div>

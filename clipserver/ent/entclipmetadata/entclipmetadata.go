@@ -21,6 +21,10 @@ const (
 	FieldDuration = "duration"
 	// FieldFormat holds the string denoting the format field in the database.
 	FieldFormat = "format"
+	// FieldWord holds the string denoting the word field in the database.
+	FieldWord = "word"
+	// FieldSentence holds the string denoting the sentence field in the database.
+	FieldSentence = "sentence"
 	// Table holds the table name of the entclipmetadata in the database.
 	Table = "ent_clip_metadata"
 )
@@ -33,6 +37,8 @@ var Columns = []string{
 	FieldFileSize,
 	FieldDuration,
 	FieldFormat,
+	FieldWord,
+	FieldSentence,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -89,4 +95,14 @@ func ByDuration(opts ...sql.OrderTermOption) OrderOption {
 // ByFormat orders the results by the format field.
 func ByFormat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFormat, opts...).ToFunc()
+}
+
+// ByWord orders the results by the word field.
+func ByWord(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWord, opts...).ToFunc()
+}
+
+// BySentence orders the results by the sentence field.
+func BySentence(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSentence, opts...).ToFunc()
 }

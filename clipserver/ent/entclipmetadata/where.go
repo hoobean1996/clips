@@ -77,6 +77,16 @@ func Format(v string) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldEQ(FieldFormat, v))
 }
 
+// Word applies equality check predicate on the "word" field. It's identical to WordEQ.
+func Word(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldEQ(FieldWord, v))
+}
+
+// Sentence applies equality check predicate on the "sentence" field. It's identical to SentenceEQ.
+func Sentence(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldEQ(FieldSentence, v))
+}
+
 // FilenameEQ applies the EQ predicate on the "filename" field.
 func FilenameEQ(v string) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldEQ(FieldFilename, v))
@@ -350,6 +360,136 @@ func FormatEqualFold(v string) predicate.EntClipMetadata {
 // FormatContainsFold applies the ContainsFold predicate on the "format" field.
 func FormatContainsFold(v string) predicate.EntClipMetadata {
 	return predicate.EntClipMetadata(sql.FieldContainsFold(FieldFormat, v))
+}
+
+// WordEQ applies the EQ predicate on the "word" field.
+func WordEQ(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldEQ(FieldWord, v))
+}
+
+// WordNEQ applies the NEQ predicate on the "word" field.
+func WordNEQ(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldNEQ(FieldWord, v))
+}
+
+// WordIn applies the In predicate on the "word" field.
+func WordIn(vs ...string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldIn(FieldWord, vs...))
+}
+
+// WordNotIn applies the NotIn predicate on the "word" field.
+func WordNotIn(vs ...string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldNotIn(FieldWord, vs...))
+}
+
+// WordGT applies the GT predicate on the "word" field.
+func WordGT(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldGT(FieldWord, v))
+}
+
+// WordGTE applies the GTE predicate on the "word" field.
+func WordGTE(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldGTE(FieldWord, v))
+}
+
+// WordLT applies the LT predicate on the "word" field.
+func WordLT(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldLT(FieldWord, v))
+}
+
+// WordLTE applies the LTE predicate on the "word" field.
+func WordLTE(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldLTE(FieldWord, v))
+}
+
+// WordContains applies the Contains predicate on the "word" field.
+func WordContains(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldContains(FieldWord, v))
+}
+
+// WordHasPrefix applies the HasPrefix predicate on the "word" field.
+func WordHasPrefix(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldHasPrefix(FieldWord, v))
+}
+
+// WordHasSuffix applies the HasSuffix predicate on the "word" field.
+func WordHasSuffix(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldHasSuffix(FieldWord, v))
+}
+
+// WordEqualFold applies the EqualFold predicate on the "word" field.
+func WordEqualFold(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldEqualFold(FieldWord, v))
+}
+
+// WordContainsFold applies the ContainsFold predicate on the "word" field.
+func WordContainsFold(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldContainsFold(FieldWord, v))
+}
+
+// SentenceEQ applies the EQ predicate on the "sentence" field.
+func SentenceEQ(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldEQ(FieldSentence, v))
+}
+
+// SentenceNEQ applies the NEQ predicate on the "sentence" field.
+func SentenceNEQ(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldNEQ(FieldSentence, v))
+}
+
+// SentenceIn applies the In predicate on the "sentence" field.
+func SentenceIn(vs ...string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldIn(FieldSentence, vs...))
+}
+
+// SentenceNotIn applies the NotIn predicate on the "sentence" field.
+func SentenceNotIn(vs ...string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldNotIn(FieldSentence, vs...))
+}
+
+// SentenceGT applies the GT predicate on the "sentence" field.
+func SentenceGT(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldGT(FieldSentence, v))
+}
+
+// SentenceGTE applies the GTE predicate on the "sentence" field.
+func SentenceGTE(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldGTE(FieldSentence, v))
+}
+
+// SentenceLT applies the LT predicate on the "sentence" field.
+func SentenceLT(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldLT(FieldSentence, v))
+}
+
+// SentenceLTE applies the LTE predicate on the "sentence" field.
+func SentenceLTE(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldLTE(FieldSentence, v))
+}
+
+// SentenceContains applies the Contains predicate on the "sentence" field.
+func SentenceContains(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldContains(FieldSentence, v))
+}
+
+// SentenceHasPrefix applies the HasPrefix predicate on the "sentence" field.
+func SentenceHasPrefix(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldHasPrefix(FieldSentence, v))
+}
+
+// SentenceHasSuffix applies the HasSuffix predicate on the "sentence" field.
+func SentenceHasSuffix(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldHasSuffix(FieldSentence, v))
+}
+
+// SentenceEqualFold applies the EqualFold predicate on the "sentence" field.
+func SentenceEqualFold(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldEqualFold(FieldSentence, v))
+}
+
+// SentenceContainsFold applies the ContainsFold predicate on the "sentence" field.
+func SentenceContainsFold(v string) predicate.EntClipMetadata {
+	return predicate.EntClipMetadata(sql.FieldContainsFold(FieldSentence, v))
 }
 
 // And groups predicates with the AND operator between them.

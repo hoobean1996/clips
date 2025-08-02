@@ -111,6 +111,34 @@ func (ecmu *EntClipMetadataUpdate) SetNillableFormat(s *string) *EntClipMetadata
 	return ecmu
 }
 
+// SetWord sets the "word" field.
+func (ecmu *EntClipMetadataUpdate) SetWord(s string) *EntClipMetadataUpdate {
+	ecmu.mutation.SetWord(s)
+	return ecmu
+}
+
+// SetNillableWord sets the "word" field if the given value is not nil.
+func (ecmu *EntClipMetadataUpdate) SetNillableWord(s *string) *EntClipMetadataUpdate {
+	if s != nil {
+		ecmu.SetWord(*s)
+	}
+	return ecmu
+}
+
+// SetSentence sets the "sentence" field.
+func (ecmu *EntClipMetadataUpdate) SetSentence(s string) *EntClipMetadataUpdate {
+	ecmu.mutation.SetSentence(s)
+	return ecmu
+}
+
+// SetNillableSentence sets the "sentence" field if the given value is not nil.
+func (ecmu *EntClipMetadataUpdate) SetNillableSentence(s *string) *EntClipMetadataUpdate {
+	if s != nil {
+		ecmu.SetSentence(*s)
+	}
+	return ecmu
+}
+
 // Mutation returns the EntClipMetadataMutation object of the builder.
 func (ecmu *EntClipMetadataUpdate) Mutation() *EntClipMetadataMutation {
 	return ecmu.mutation
@@ -200,6 +228,12 @@ func (ecmu *EntClipMetadataUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := ecmu.mutation.Format(); ok {
 		_spec.SetField(entclipmetadata.FieldFormat, field.TypeString, value)
+	}
+	if value, ok := ecmu.mutation.Word(); ok {
+		_spec.SetField(entclipmetadata.FieldWord, field.TypeString, value)
+	}
+	if value, ok := ecmu.mutation.Sentence(); ok {
+		_spec.SetField(entclipmetadata.FieldSentence, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ecmu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -301,6 +335,34 @@ func (ecmuo *EntClipMetadataUpdateOne) SetFormat(s string) *EntClipMetadataUpdat
 func (ecmuo *EntClipMetadataUpdateOne) SetNillableFormat(s *string) *EntClipMetadataUpdateOne {
 	if s != nil {
 		ecmuo.SetFormat(*s)
+	}
+	return ecmuo
+}
+
+// SetWord sets the "word" field.
+func (ecmuo *EntClipMetadataUpdateOne) SetWord(s string) *EntClipMetadataUpdateOne {
+	ecmuo.mutation.SetWord(s)
+	return ecmuo
+}
+
+// SetNillableWord sets the "word" field if the given value is not nil.
+func (ecmuo *EntClipMetadataUpdateOne) SetNillableWord(s *string) *EntClipMetadataUpdateOne {
+	if s != nil {
+		ecmuo.SetWord(*s)
+	}
+	return ecmuo
+}
+
+// SetSentence sets the "sentence" field.
+func (ecmuo *EntClipMetadataUpdateOne) SetSentence(s string) *EntClipMetadataUpdateOne {
+	ecmuo.mutation.SetSentence(s)
+	return ecmuo
+}
+
+// SetNillableSentence sets the "sentence" field if the given value is not nil.
+func (ecmuo *EntClipMetadataUpdateOne) SetNillableSentence(s *string) *EntClipMetadataUpdateOne {
+	if s != nil {
+		ecmuo.SetSentence(*s)
 	}
 	return ecmuo
 }
@@ -424,6 +486,12 @@ func (ecmuo *EntClipMetadataUpdateOne) sqlSave(ctx context.Context) (_node *EntC
 	}
 	if value, ok := ecmuo.mutation.Format(); ok {
 		_spec.SetField(entclipmetadata.FieldFormat, field.TypeString, value)
+	}
+	if value, ok := ecmuo.mutation.Word(); ok {
+		_spec.SetField(entclipmetadata.FieldWord, field.TypeString, value)
+	}
+	if value, ok := ecmuo.mutation.Sentence(); ok {
+		_spec.SetField(entclipmetadata.FieldSentence, field.TypeString, value)
 	}
 	_node = &EntClipMetadata{config: ecmuo.config}
 	_spec.Assign = _node.assignValues

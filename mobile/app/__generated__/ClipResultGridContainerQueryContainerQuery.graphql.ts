@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0ad7811338924b69ce6cde856eb8441e>>
+ * @generated SignedSource<<47529f4bd76205948e192c3e4c7fef4e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -77,6 +77,32 @@ export type EntClipMetadataWhereInput = {
   idNotIn?: ReadonlyArray<string> | null | undefined;
   not?: EntClipMetadataWhereInput | null | undefined;
   or?: ReadonlyArray<EntClipMetadataWhereInput> | null | undefined;
+  sentence?: string | null | undefined;
+  sentenceContains?: string | null | undefined;
+  sentenceContainsFold?: string | null | undefined;
+  sentenceEqualFold?: string | null | undefined;
+  sentenceGT?: string | null | undefined;
+  sentenceGTE?: string | null | undefined;
+  sentenceHasPrefix?: string | null | undefined;
+  sentenceHasSuffix?: string | null | undefined;
+  sentenceIn?: ReadonlyArray<string> | null | undefined;
+  sentenceLT?: string | null | undefined;
+  sentenceLTE?: string | null | undefined;
+  sentenceNEQ?: string | null | undefined;
+  sentenceNotIn?: ReadonlyArray<string> | null | undefined;
+  word?: string | null | undefined;
+  wordContains?: string | null | undefined;
+  wordContainsFold?: string | null | undefined;
+  wordEqualFold?: string | null | undefined;
+  wordGT?: string | null | undefined;
+  wordGTE?: string | null | undefined;
+  wordHasPrefix?: string | null | undefined;
+  wordHasSuffix?: string | null | undefined;
+  wordIn?: ReadonlyArray<string> | null | undefined;
+  wordLT?: string | null | undefined;
+  wordLTE?: string | null | undefined;
+  wordNEQ?: string | null | undefined;
+  wordNotIn?: ReadonlyArray<string> | null | undefined;
 };
 export type ClipResultGridContainerQueryContainerQuery$variables = {
   count: number;

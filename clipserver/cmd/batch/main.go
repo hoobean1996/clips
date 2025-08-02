@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -27,21 +26,33 @@ type SubtitleEntry struct {
 	Text      string
 }
 
-// 单词片段结构
-type WordClip struct {
-	Word      string
+// 句子片段结构
+type SentenceClip struct {
+	Sentence  string
 	StartTime string
 	EndTime   string
 	Filename  string
 }
 
-var videoPath = flag.String("path", "", "视频文件夹路径")
+var (
+	dataPath  = flag.String("data", "", "要处理的视频文件夹路径")
+	clipsPath = flag.String("clips", "", "处理后的剪辑文件保存路径")
+)
 
 func main() {
 	flag.Parse()
 
-	if *videoPath == "" {
-		log.Fatal("请使用 -path 参数指定视频文件夹路径")
+	if *dataPath == "" {
+		log.Fatal("请使用 -data 参数指定视频文件夹路径")
+	}
+
+	if *clipsPath == "" {
+		log.Fatal("请使用 -clips 参数指定剪辑文件保存路径")
+	}
+
+	// 创建剪辑保存目录（如果不存在）
+	if err := os.MkdirAll(*clipsPath, 0755); err != nil {
+		log.Fatal("创建剪辑目录失败:", err)
 	}
 
 	// Create ent.Client and run the schema migration.
@@ -58,152 +69,149 @@ func main() {
 		log.Fatal("creating schema", err)
 	}
 
-	batchProcessVideos(client, *videoPath)
+	processVideos(client, *dataPath, *clipsPath)
 }
 
-func batchProcessVideos(client *ent.Client, path string) {
-	log.Printf("开始处理目录: %s", path)
+func processVideos(client *ent.Client, dataDir, clipsDir string) {
+	log.Printf("开始处理目录: %s", dataDir)
+	log.Printf("剪辑保存目录: %s", clipsDir)
 
-	// 1. 扫描指定目录的所有mp4视频
-	videoFiles, err := scanVideoFiles(path)
-	if err != nil {
-		log.Printf("扫描视频文件失败: %v", err)
-		return
-	}
-
+	// 1. 扫描指定目录的所有视频
+	videoFiles := scanVideosUnder(dataDir)
 	log.Printf("找到 %d 个视频文件", len(videoFiles))
 
 	for _, videoFile := range videoFiles {
 		log.Printf("处理视频: %s", videoFile)
-		if strings.Contains(*videoPath, "_") {
-			return
+
+		// 2. 准备视频的字幕信息
+		srtFile := prepareVideoSRT(videoFile)
+		if srtFile == "" {
+			log.Printf("跳过视频 %s (无法获取字幕)", videoFile)
+			continue
 		}
-		getSubtitleFile(videoFile)
-		ensureVideoWithSubtitleHardcoded(videoFile)
 
-		// 2. 检查并获取字幕文件
-		subtitleFile := getSubtitleFile(videoFile)
-
-		// 3. 处理字幕文件获取单词列表
-		wordClips := processSubtitleFile(videoFile, subtitleFile)
-
-		// 4. 生成视频剪辑并保存到数据库
-		for _, wordClip := range wordClips {
-			err := generateClipAndSave(client, videoFile, wordClip)
-			if err != nil {
-				log.Printf("处理单词mp4剪辑失败 %s: %v", wordClip.Word, err)
-				continue
-			}
-			err = generateh264ClipAndSave(client, videoFile, wordClip)
-			if err != nil {
-				log.Printf("处理单词h264剪辑失败 %s: %v", wordClip.Word, err)
-				continue
-			}
-			log.Printf("成功创建剪辑: %s", wordClip.Filename)
+		// 3. 按句子剪辑视频
+		err := clipBySentence(client, videoFile, srtFile, clipsDir)
+		if err != nil {
+			log.Printf("剪辑视频失败 %s: %v", videoFile, err)
+			continue
 		}
 	}
 
 	log.Println("批处理完成")
 }
 
-// 扫描目录中的所有mp4文件
-func scanVideoFiles(dir string) ([]string, error) {
+func scanVideosUnder(path string) []string {
 	var videoFiles []string
 
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if !info.IsDir() && strings.ToLower(filepath.Ext(path)) == ".mp4" {
-			videoFiles = append(videoFiles, path)
+		if !info.IsDir() {
+			ext := strings.ToLower(filepath.Ext(filePath))
+			filename := info.Name()
+
+			// 支持常见的视频格式
+			if ext == ".mp4" || ext == ".avi" || ext == ".mov" || ext == ".mkv" {
+				// 跳过文件名包含 "_with_srt" 的视频文件
+				if strings.Contains(filename, "_with_srt") {
+					log.Printf("跳过带硬编码字幕的视频文件: %s", filename)
+					return nil
+				}
+				videoFiles = append(videoFiles, filePath)
+			}
 		}
 
 		return nil
 	})
 
-	return videoFiles, err
+	if err != nil {
+		log.Printf("扫描视频文件时出错: %v", err)
+	}
+
+	return videoFiles
 }
 
-func copyFile(src, dst string) error {
-	sourceFile, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer sourceFile.Close()
+// prepareVideoSRT 准备视频的字幕文件
+func prepareVideoSRT(videoPath string) string {
+	baseDir := filepath.Dir(videoPath)
+	baseName := strings.TrimSuffix(filepath.Base(videoPath), filepath.Ext(videoPath))
+	srtFile := filepath.Join(baseDir, baseName+".srt")
 
-	destFile, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer destFile.Close()
-
-	_, err = io.Copy(destFile, sourceFile)
-	return err
-}
-
-// 获取或生成字幕文件
-func getSubtitleFile(videoFile string) string {
-	baseDir := filepath.Dir(videoFile)
-	baseName := strings.TrimSuffix(filepath.Base(videoFile), filepath.Ext(videoFile))
-
-	// 检查是否已有提取的字幕文件
-	preparedSrt := filepath.Join(baseDir, baseName+"_prepared.srt")
-	if _, err := os.Stat(preparedSrt); err == nil {
-		log.Printf("使用已存在的字幕文件: %s", preparedSrt)
-		return preparedSrt
+	// 检查是否已有字幕文件
+	if _, err := os.Stat(srtFile); err == nil {
+		log.Printf("使用已存在的字幕文件: %s", srtFile)
+		return srtFile
 	}
 
-	// 尝试使用ffmpeg提取内置字幕
-	if extractEmbeddedSubtitle(videoFile, preparedSrt) {
-		log.Printf("成功提取内置字幕: %s", preparedSrt)
-		return preparedSrt
+	// 1. 尝试提取内置字幕
+	if extractEmbeddedSubtitle(videoPath, srtFile) {
+		log.Printf("成功提取内置字幕: %s", srtFile)
+		return srtFile
 	}
 
-	// 使用whisper生成字幕
-	if generateSubtitleWithWhisper(videoFile, preparedSrt) {
-		log.Printf("成功生成whisper字幕: %s", preparedSrt)
-		return preparedSrt
+	// 2. 使用whisper生成字幕
+	if generateSubtitleWithWhisper(videoPath, srtFile) {
+		log.Printf("成功生成whisper字幕: %s", srtFile)
+
+		// 生成带硬编码字幕的视频
+		videoWithSrtPath := filepath.Join(baseDir, baseName+"_with_srt.mp4")
+		if hardcodeSubtitlesToVideo(videoPath, srtFile, videoWithSrtPath) {
+			log.Printf("成功生成带硬编码字幕的视频: %s", videoWithSrtPath)
+		}
+
+		return srtFile
 	}
 
-	log.Printf("字幕文件获取失败: %s", videoFile)
+	log.Printf("字幕文件获取失败: %s", videoPath)
 	return ""
 }
 
-// 确保MP4视频包含内置字幕，如果没有则将外部SRT字幕写入
-// 硬编码字幕版本（字幕直接烧录到视频画面中）
-func ensureVideoWithSubtitleHardcoded(videoFile string) error {
-	baseDir := filepath.Dir(videoFile)
-	baseName := strings.TrimSuffix(filepath.Base(videoFile), filepath.Ext(videoFile))
-	srtFile := filepath.Join(baseDir, baseName+".srt")
-
-	if _, err := os.Stat(srtFile); os.IsNotExist(err) {
-		return fmt.Errorf("未找到SRT字幕文件: %s", srtFile)
+// clipBySentence 按句子剪辑视频
+func clipBySentence(client *ent.Client, videoPath, srtFile, clipsDir string) error {
+	// 解析字幕文件
+	subtitles := parseSubtitleFile(srtFile)
+	if len(subtitles) == 0 {
+		return fmt.Errorf("字幕文件解析失败: %s", srtFile)
 	}
 
-	tempFile := videoFile + ".temp"
+	baseName := strings.TrimSuffix(filepath.Base(videoPath), filepath.Ext(videoPath))
 
-	// 硬编码字幕到视频中
-	cmd := exec.Command("ffmpeg",
-		"-i", videoFile,
-		"-vf", fmt.Sprintf("subtitles=%s", srtFile),
-		"-c:a", "copy",
-		"-y", tempFile,
-	)
+	// 为每个字幕句子生成剪辑
+	for i, subtitle := range subtitles {
+		// 清理句子文本，用于文件名
+		cleanText := cleanTextForFilename(subtitle.Text)
+		if cleanText == "" {
+			continue
+		}
 
-	if err := cmd.Run(); err != nil {
-		os.Remove(tempFile)
-		return fmt.Errorf("硬编码字幕失败: %v", err)
+		// 生成剪辑文件名
+		clipFilename := fmt.Sprintf("%s_sentence_%03d_%s.mp4", baseName, i+1, cleanText)
+		clipPath := filepath.Join(clipsDir, clipFilename)
+
+		sentenceClip := SentenceClip{
+			Sentence:  subtitle.Text,
+			StartTime: subtitle.StartTime,
+			EndTime:   subtitle.EndTime,
+			Filename:  clipPath,
+		}
+
+		// 生成剪辑
+		err := generateSentenceClip(client, videoPath, sentenceClip)
+		if err != nil {
+			log.Printf("生成句子剪辑失败 (句子 %d): %v", i+1, err)
+			continue
+		}
+
+		log.Printf("成功创建句子剪辑: %s", clipFilename)
 	}
 
-	os.Rename(videoFile, videoFile+".backup")
-	os.Rename(tempFile, videoFile)
-
-	log.Printf("字幕已硬编码到视频: %s", videoFile)
 	return nil
 }
 
-// 使用ffmpeg提取内置字幕
+// extractEmbeddedSubtitle 使用ffmpeg提取内置字幕
 func extractEmbeddedSubtitle(videoFile, outputSrt string) bool {
 	cmd := exec.Command("ffmpeg", "-i", videoFile, "-map", "0:s:0", "-c:s", "srt", outputSrt, "-y")
 	err := cmd.Run()
@@ -214,7 +222,7 @@ func extractEmbeddedSubtitle(videoFile, outputSrt string) bool {
 	return true
 }
 
-// 使用whisper生成字幕
+// generateSubtitleWithWhisper 使用whisper生成字幕
 func generateSubtitleWithWhisper(videoFile, outputSrt string) bool {
 	cmd := exec.Command("whisper", videoFile, "--output_format", "srt", "--output_dir", filepath.Dir(outputSrt))
 	err := cmd.Run()
@@ -234,45 +242,25 @@ func generateSubtitleWithWhisper(videoFile, outputSrt string) bool {
 	return false
 }
 
-// 处理字幕文件获取单词片段
-func processSubtitleFile(videoFile, subtitleFile string) []WordClip {
-	if subtitleFile == "" {
-		return nil
+// hardcodeSubtitlesToVideo 将字幕硬编码到视频中
+func hardcodeSubtitlesToVideo(videoFile, srtFile, outputVideo string) bool {
+	cmd := exec.Command("ffmpeg",
+		"-i", videoFile,
+		"-vf", fmt.Sprintf("subtitles=%s", srtFile),
+		"-c:a", "copy",
+		"-y", outputVideo,
+	)
+
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("硬编码字幕失败: %v", err)
+		return false
 	}
 
-	// 解析字幕文件
-	subtitles := parseSubtitleFile(subtitleFile)
-	if len(subtitles) == 0 {
-		log.Printf("字幕文件解析失败: %s", subtitleFile)
-		return nil
-	}
-
-	// 提取所有单词
-	words := extractWordsFromSubtitles(subtitles)
-
-	// 为每个单词查找时间戳
-	var wordClips []WordClip
-	baseDir := filepath.Dir(videoFile)
-	baseName := strings.TrimSuffix(filepath.Base(videoFile), filepath.Ext(videoFile))
-
-	for _, word := range words {
-		startTime, endTime := findWordTimestamp(word, subtitles)
-		if startTime != "" && endTime != "" {
-			filename := fmt.Sprintf("%s_%s.mp4", baseName, word)
-
-			wordClips = append(wordClips, WordClip{
-				Word:      word,
-				StartTime: startTime,
-				EndTime:   endTime,
-				Filename:  filepath.Join(baseDir, filename),
-			})
-		}
-	}
-
-	return wordClips
+	return true
 }
 
-// 解析SRT字幕文件
+// parseSubtitleFile 解析SRT字幕文件
 func parseSubtitleFile(filename string) []SubtitleEntry {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -323,53 +311,62 @@ func parseSubtitleFile(filename string) []SubtitleEntry {
 	return subtitles
 }
 
-// 从字幕中提取所有单词
-func extractWordsFromSubtitles(subtitles []SubtitleEntry) []string {
-	wordSet := make(map[string]bool)
+// cleanTextForFilename 清理文本用于文件名
+func cleanTextForFilename(text string) string {
+	// 移除HTML标签
+	text = regexp.MustCompile(`<[^>]*>`).ReplaceAllString(text, "")
 
+	// 只保留字母、数字和空格
+	text = regexp.MustCompile(`[^a-zA-Z0-9\s]`).ReplaceAllString(text, "")
+
+	// 替换多个空格为单个空格
+	text = regexp.MustCompile(`\s+`).ReplaceAllString(text, " ")
+
+	// 去除首尾空格
+	text = strings.TrimSpace(text)
+
+	// 替换空格为下划线，并限制长度
+	text = strings.ReplaceAll(text, " ", "_")
+	if len(text) > 50 {
+		text = text[:50]
+	}
+
+	return text
+}
+
+// extractWordsFromSentence 从句子中提取单词
+func extractWordsFromSentence(sentence string) []string {
 	// 匹配单词的正则表达式
 	wordRegex := regexp.MustCompile(`\b[a-zA-Z]+\b`)
 
-	for _, subtitle := range subtitles {
-		words := wordRegex.FindAllString(subtitle.Text, -1)
-		for _, word := range words {
-			word = strings.ToLower(word)
-			if len(word) > 2 { // 只保留长度大于2的单词
-				wordSet[word] = true
-			}
+	words := wordRegex.FindAllString(sentence, -1)
+
+	// 转换为小写并去重
+	wordSet := make(map[string]bool)
+	for _, word := range words {
+		word = strings.ToLower(word)
+		if len(word) > 1 { // 只保留长度大于1的单词
+			wordSet[word] = true
 		}
 	}
 
 	// 转换为切片
-	var words []string
+	var uniqueWords []string
 	for word := range wordSet {
-		words = append(words, word)
+		uniqueWords = append(uniqueWords, word)
 	}
 
-	return words
+	return uniqueWords
 }
 
-// 查找单词在字幕中的时间戳
-func findWordTimestamp(word string, subtitles []SubtitleEntry) (string, string) {
-	wordRegex := regexp.MustCompile(`\b` + regexp.QuoteMeta(strings.ToLower(word)) + `\b`)
-
-	for _, subtitle := range subtitles {
-		if wordRegex.MatchString(strings.ToLower(subtitle.Text)) {
-			return subtitle.StartTime, subtitle.EndTime
-		}
-	}
-
-	return "", ""
-}
-
-// 生成视频剪辑并保存到数据库
-func generateClipAndSave(client *ent.Client, videoFile string, wordClip WordClip) error {
+// generateSentenceClip 生成句子剪辑
+func generateSentenceClip(client *ent.Client, videoFile string, sentenceClip SentenceClip) error {
 	// 转换时间格式为ffmpeg支持的格式
-	startSeconds := timeToSeconds(wordClip.StartTime)
-	endSeconds := timeToSeconds(wordClip.EndTime)
+	startSeconds := timeToSeconds(sentenceClip.StartTime)
+	endSeconds := timeToSeconds(sentenceClip.EndTime)
 
 	// 验证剪辑参数
-	if err := validateClipParams(startSeconds, endSeconds, wordClip.Word); err != nil {
+	if err := validateClipParams(startSeconds, endSeconds); err != nil {
 		return fmt.Errorf("参数验证失败: %v", err)
 	}
 
@@ -377,62 +374,7 @@ func generateClipAndSave(client *ent.Client, videoFile string, wordClip WordClip
 	startTime := fmt.Sprintf("%.3f", startSeconds)
 	duration := fmt.Sprintf("%.3f", endSeconds-startSeconds)
 
-	log.Printf("剪辑 %s: 开始时间=%.3fs, 时长=%.3fs", wordClip.Word, startSeconds, endSeconds-startSeconds)
-
-	// 使用ffmpeg生成剪辑 (-t 参数比 -to 更可靠)
-	cmd := exec.Command("ffmpeg",
-		"-i", videoFile,
-		"-ss", startTime,
-		"-t", duration,
-		"-c", "copy",
-		"-avoid_negative_ts", "make_zero",
-		wordClip.Filename,
-		"-y")
-
-	// 捕获错误输出以便调试
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("ffmpeg剪辑失败: %v, 输出: %s", err, string(output))
-	}
-
-	// 获取文件信息
-	fileInfo, err := os.Stat(wordClip.Filename)
-	if err != nil {
-		return fmt.Errorf("获取文件信息失败: %v", err)
-	}
-
-	// 保存到数据库
-	_, err = client.EntClipMetadata.Create().
-		SetFileURL(wordClip.Filename).
-		SetFilename(filepath.Base(wordClip.Filename)).
-		SetFileSize(int64(fileInfo.Size())).
-		SetDuration(int(endSeconds) - int(startSeconds)).
-		SetFormat("mp4").
-		Save(context.Background())
-
-	if err != nil {
-		return fmt.Errorf("保存到数据库失败: %v", err)
-	}
-
-	return nil
-}
-
-// 生成H.264编码的视频剪辑并保存到数据库
-func generateh264ClipAndSave(client *ent.Client, videoFile string, wordClip WordClip) error {
-	// 转换时间格式为ffmpeg支持的格式
-	startSeconds := timeToSeconds(wordClip.StartTime)
-	endSeconds := timeToSeconds(wordClip.EndTime)
-
-	// 验证剪辑参数
-	if err := validateClipParams(startSeconds, endSeconds, wordClip.Word); err != nil {
-		return fmt.Errorf("参数验证失败: %v", err)
-	}
-
-	// 格式化为ffmpeg期望的格式 (秒数)
-	startTime := fmt.Sprintf("%.3f", startSeconds)
-	duration := fmt.Sprintf("%.3f", endSeconds-startSeconds)
-
-	log.Printf("剪辑 %s (H.264): 开始时间=%.3fs, 时长=%.3fs", wordClip.Word, startSeconds, endSeconds-startSeconds)
+	log.Printf("剪辑句子: 开始时间=%.3fs, 时长=%.3fs", startSeconds, endSeconds-startSeconds)
 
 	// 使用ffmpeg生成H.264编码的剪辑，优化移动端兼容性
 	cmd := exec.Command("ffmpeg",
@@ -453,39 +395,45 @@ func generateh264ClipAndSave(client *ent.Client, videoFile string, wordClip Word
 		"-pix_fmt", "yuv420p", // 像素格式，兼容性最好
 		// 其他参数
 		"-avoid_negative_ts", "make_zero",
-		wordClip.Filename,
+		sentenceClip.Filename,
 		"-y") // 覆盖已存在文件
 
 	// 捕获错误输出以便调试
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("ffmpeg H.264剪辑失败: %v, 输出: %s", err, string(output))
+		return fmt.Errorf("ffmpeg剪辑失败: %v, 输出: %s", err, string(output))
 	}
 
 	// 获取文件信息
-	fileInfo, err := os.Stat(wordClip.Filename)
+	fileInfo, err := os.Stat(sentenceClip.Filename)
 	if err != nil {
 		return fmt.Errorf("获取文件信息失败: %v", err)
 	}
+	words := extractWordsFromSentence(sentenceClip.Sentence)
 
-	// 保存到数据库
-	_, err = client.EntClipMetadata.Create().
-		SetFileURL(wordClip.Filename).
-		SetFilename(filepath.Base(wordClip.Filename)).
-		SetFileSize(int64(fileInfo.Size())).
-		SetDuration(int(endSeconds) - int(startSeconds)).
-		SetFormat("mp4").
-		Save(context.Background())
+	for _, word := range words {
+		// 保存到数据库
+		_, err = client.EntClipMetadata.Create().
+			SetFileURL(sentenceClip.Filename).
+			SetWord(word).
+			SetSentence(sentenceClip.Sentence).
+			SetFilename(filepath.Base(sentenceClip.Filename)).
+			SetFileSize(int64(fileInfo.Size())).
+			SetDuration(int(endSeconds) - int(startSeconds) + 1).
+			SetFormat("mp4").
+			Save(context.Background())
 
-	if err != nil {
-		return fmt.Errorf("保存到数据库失败: %v", err)
+		if err != nil {
+			log.Printf("保存单词 '%s' 到数据库失败: %v", word, err)
+			continue
+		}
 	}
 
-	log.Printf("H.264剪辑生成成功: %s, 文件大小: %d bytes", wordClip.Filename, fileInfo.Size())
+	log.Printf("句子剪辑生成成功: %s, 文件大小: %d bytes", sentenceClip.Filename, fileInfo.Size())
 	return nil
 }
 
-// 将时间字符串转换为秒数
+// timeToSeconds 将时间字符串转换为秒数
 func timeToSeconds(timeStr string) float64 {
 	// 移除可能的空格并标准化格式
 	timeStr = strings.TrimSpace(timeStr)
@@ -509,12 +457,11 @@ func timeToSeconds(timeStr string) float64 {
 	}
 
 	totalSeconds := hours*3600 + minutes*60 + seconds
-	log.Printf("时间转换: %s -> %.3f秒", timeStr, totalSeconds)
 	return totalSeconds
 }
 
-// 验证剪辑参数是否合理
-func validateClipParams(startSeconds, endSeconds float64, word string) error {
+// validateClipParams 验证剪辑参数是否合理
+func validateClipParams(startSeconds, endSeconds float64) error {
 	if startSeconds < 0 {
 		return fmt.Errorf("开始时间不能为负数: %.3f", startSeconds)
 	}
@@ -524,7 +471,7 @@ func validateClipParams(startSeconds, endSeconds float64, word string) error {
 	}
 
 	duration := endSeconds - startSeconds
-	if duration > 30 {
+	if duration > 60 {
 		return fmt.Errorf("剪辑时长过长 (%.1f秒), 可能是时间戳错误", duration)
 	}
 

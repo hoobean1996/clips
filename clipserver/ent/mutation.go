@@ -41,6 +41,8 @@ type EntClipMetadataMutation struct {
 	duration      *int
 	addduration   *int
 	format        *string
+	word          *string
+	sentence      *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*EntClipMetadata, error)
@@ -365,6 +367,78 @@ func (m *EntClipMetadataMutation) ResetFormat() {
 	m.format = nil
 }
 
+// SetWord sets the "word" field.
+func (m *EntClipMetadataMutation) SetWord(s string) {
+	m.word = &s
+}
+
+// Word returns the value of the "word" field in the mutation.
+func (m *EntClipMetadataMutation) Word() (r string, exists bool) {
+	v := m.word
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWord returns the old "word" field's value of the EntClipMetadata entity.
+// If the EntClipMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EntClipMetadataMutation) OldWord(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWord is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWord requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWord: %w", err)
+	}
+	return oldValue.Word, nil
+}
+
+// ResetWord resets all changes to the "word" field.
+func (m *EntClipMetadataMutation) ResetWord() {
+	m.word = nil
+}
+
+// SetSentence sets the "sentence" field.
+func (m *EntClipMetadataMutation) SetSentence(s string) {
+	m.sentence = &s
+}
+
+// Sentence returns the value of the "sentence" field in the mutation.
+func (m *EntClipMetadataMutation) Sentence() (r string, exists bool) {
+	v := m.sentence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSentence returns the old "sentence" field's value of the EntClipMetadata entity.
+// If the EntClipMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EntClipMetadataMutation) OldSentence(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSentence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSentence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSentence: %w", err)
+	}
+	return oldValue.Sentence, nil
+}
+
+// ResetSentence resets all changes to the "sentence" field.
+func (m *EntClipMetadataMutation) ResetSentence() {
+	m.sentence = nil
+}
+
 // Where appends a list predicates to the EntClipMetadataMutation builder.
 func (m *EntClipMetadataMutation) Where(ps ...predicate.EntClipMetadata) {
 	m.predicates = append(m.predicates, ps...)
@@ -399,7 +473,7 @@ func (m *EntClipMetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EntClipMetadataMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
 	if m.filename != nil {
 		fields = append(fields, entclipmetadata.FieldFilename)
 	}
@@ -414,6 +488,12 @@ func (m *EntClipMetadataMutation) Fields() []string {
 	}
 	if m.format != nil {
 		fields = append(fields, entclipmetadata.FieldFormat)
+	}
+	if m.word != nil {
+		fields = append(fields, entclipmetadata.FieldWord)
+	}
+	if m.sentence != nil {
+		fields = append(fields, entclipmetadata.FieldSentence)
 	}
 	return fields
 }
@@ -433,6 +513,10 @@ func (m *EntClipMetadataMutation) Field(name string) (ent.Value, bool) {
 		return m.Duration()
 	case entclipmetadata.FieldFormat:
 		return m.Format()
+	case entclipmetadata.FieldWord:
+		return m.Word()
+	case entclipmetadata.FieldSentence:
+		return m.Sentence()
 	}
 	return nil, false
 }
@@ -452,6 +536,10 @@ func (m *EntClipMetadataMutation) OldField(ctx context.Context, name string) (en
 		return m.OldDuration(ctx)
 	case entclipmetadata.FieldFormat:
 		return m.OldFormat(ctx)
+	case entclipmetadata.FieldWord:
+		return m.OldWord(ctx)
+	case entclipmetadata.FieldSentence:
+		return m.OldSentence(ctx)
 	}
 	return nil, fmt.Errorf("unknown EntClipMetadata field %s", name)
 }
@@ -495,6 +583,20 @@ func (m *EntClipMetadataMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFormat(v)
+		return nil
+	case entclipmetadata.FieldWord:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWord(v)
+		return nil
+	case entclipmetadata.FieldSentence:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSentence(v)
 		return nil
 	}
 	return fmt.Errorf("unknown EntClipMetadata field %s", name)
@@ -586,6 +688,12 @@ func (m *EntClipMetadataMutation) ResetField(name string) error {
 		return nil
 	case entclipmetadata.FieldFormat:
 		m.ResetFormat()
+		return nil
+	case entclipmetadata.FieldWord:
+		m.ResetWord()
+		return nil
+	case entclipmetadata.FieldSentence:
+		m.ResetSentence()
 		return nil
 	}
 	return fmt.Errorf("unknown EntClipMetadata field %s", name)

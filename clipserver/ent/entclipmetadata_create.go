@@ -57,6 +57,18 @@ func (ecmc *EntClipMetadataCreate) SetNillableFormat(s *string) *EntClipMetadata
 	return ecmc
 }
 
+// SetWord sets the "word" field.
+func (ecmc *EntClipMetadataCreate) SetWord(s string) *EntClipMetadataCreate {
+	ecmc.mutation.SetWord(s)
+	return ecmc
+}
+
+// SetSentence sets the "sentence" field.
+func (ecmc *EntClipMetadataCreate) SetSentence(s string) *EntClipMetadataCreate {
+	ecmc.mutation.SetSentence(s)
+	return ecmc
+}
+
 // Mutation returns the EntClipMetadataMutation object of the builder.
 func (ecmc *EntClipMetadataCreate) Mutation() *EntClipMetadataMutation {
 	return ecmc.mutation
@@ -135,6 +147,12 @@ func (ecmc *EntClipMetadataCreate) check() error {
 	if _, ok := ecmc.mutation.Format(); !ok {
 		return &ValidationError{Name: "format", err: errors.New(`ent: missing required field "EntClipMetadata.format"`)}
 	}
+	if _, ok := ecmc.mutation.Word(); !ok {
+		return &ValidationError{Name: "word", err: errors.New(`ent: missing required field "EntClipMetadata.word"`)}
+	}
+	if _, ok := ecmc.mutation.Sentence(); !ok {
+		return &ValidationError{Name: "sentence", err: errors.New(`ent: missing required field "EntClipMetadata.sentence"`)}
+	}
 	return nil
 }
 
@@ -180,6 +198,14 @@ func (ecmc *EntClipMetadataCreate) createSpec() (*EntClipMetadata, *sqlgraph.Cre
 	if value, ok := ecmc.mutation.Format(); ok {
 		_spec.SetField(entclipmetadata.FieldFormat, field.TypeString, value)
 		_node.Format = value
+	}
+	if value, ok := ecmc.mutation.Word(); ok {
+		_spec.SetField(entclipmetadata.FieldWord, field.TypeString, value)
+		_node.Word = &value
+	}
+	if value, ok := ecmc.mutation.Sentence(); ok {
+		_spec.SetField(entclipmetadata.FieldSentence, field.TypeString, value)
+		_node.Sentence = &value
 	}
 	return _node, _spec
 }

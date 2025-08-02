@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fb38eb850d625a63491dcadd03568be1>>
+ * @generated SignedSource<<dfb083df6343a8e0f95335d51bd3c5f3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,6 +17,8 @@ export type ClipResultCard_clipMetadata$data = {
   readonly filename: string;
   readonly format: string;
   readonly id: string;
+  readonly sentence: string;
+  readonly word: string;
   readonly " $fragmentType": "ClipResultCard_clipMetadata";
 };
 export type ClipResultCard_clipMetadata$key = {
@@ -71,12 +73,26 @@ const node: ReaderFragment = {
       "kind": "ScalarField",
       "name": "format",
       "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "word",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "sentence",
+      "storageKey": null
     }
   ],
   "type": "EntClipMetadata",
   "abstractKey": null
 };
 
-(node as any).hash = "dba97f0437fb163b18bd6d9df9158c7b";
+(node as any).hash = "1984ed4c4a35f18da8e61867291dbd77";
 
 export default node;

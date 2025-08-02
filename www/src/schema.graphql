@@ -29,6 +29,8 @@ type EntClipMetadata implements Node {
 
   """视频格式"""
   format: String!
+  word: String!
+  sentence: String!
 }
 
 """A connection to a list of items."""
@@ -135,6 +137,36 @@ input EntClipMetadataWhereInput {
   formatHasSuffix: String
   formatEqualFold: String
   formatContainsFold: String
+
+  """word field predicates"""
+  word: String
+  wordNEQ: String
+  wordIn: [String!]
+  wordNotIn: [String!]
+  wordGT: String
+  wordGTE: String
+  wordLT: String
+  wordLTE: String
+  wordContains: String
+  wordHasPrefix: String
+  wordHasSuffix: String
+  wordEqualFold: String
+  wordContainsFold: String
+
+  """sentence field predicates"""
+  sentence: String
+  sentenceNEQ: String
+  sentenceIn: [String!]
+  sentenceNotIn: [String!]
+  sentenceGT: String
+  sentenceGTE: String
+  sentenceLT: String
+  sentenceLTE: String
+  sentenceContains: String
+  sentenceHasPrefix: String
+  sentenceHasSuffix: String
+  sentenceEqualFold: String
+  sentenceContainsFold: String
 }
 
 type EntVideoMetadata implements Node {

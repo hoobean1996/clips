@@ -92,6 +92,36 @@ type EntClipMetadataWhereInput struct {
 	FormatHasSuffix    *string  `json:"formatHasSuffix,omitempty"`
 	FormatEqualFold    *string  `json:"formatEqualFold,omitempty"`
 	FormatContainsFold *string  `json:"formatContainsFold,omitempty"`
+
+	// "word" field predicates.
+	Word             *string  `json:"word,omitempty"`
+	WordNEQ          *string  `json:"wordNEQ,omitempty"`
+	WordIn           []string `json:"wordIn,omitempty"`
+	WordNotIn        []string `json:"wordNotIn,omitempty"`
+	WordGT           *string  `json:"wordGT,omitempty"`
+	WordGTE          *string  `json:"wordGTE,omitempty"`
+	WordLT           *string  `json:"wordLT,omitempty"`
+	WordLTE          *string  `json:"wordLTE,omitempty"`
+	WordContains     *string  `json:"wordContains,omitempty"`
+	WordHasPrefix    *string  `json:"wordHasPrefix,omitempty"`
+	WordHasSuffix    *string  `json:"wordHasSuffix,omitempty"`
+	WordEqualFold    *string  `json:"wordEqualFold,omitempty"`
+	WordContainsFold *string  `json:"wordContainsFold,omitempty"`
+
+	// "sentence" field predicates.
+	Sentence             *string  `json:"sentence,omitempty"`
+	SentenceNEQ          *string  `json:"sentenceNEQ,omitempty"`
+	SentenceIn           []string `json:"sentenceIn,omitempty"`
+	SentenceNotIn        []string `json:"sentenceNotIn,omitempty"`
+	SentenceGT           *string  `json:"sentenceGT,omitempty"`
+	SentenceGTE          *string  `json:"sentenceGTE,omitempty"`
+	SentenceLT           *string  `json:"sentenceLT,omitempty"`
+	SentenceLTE          *string  `json:"sentenceLTE,omitempty"`
+	SentenceContains     *string  `json:"sentenceContains,omitempty"`
+	SentenceHasPrefix    *string  `json:"sentenceHasPrefix,omitempty"`
+	SentenceHasSuffix    *string  `json:"sentenceHasSuffix,omitempty"`
+	SentenceEqualFold    *string  `json:"sentenceEqualFold,omitempty"`
+	SentenceContainsFold *string  `json:"sentenceContainsFold,omitempty"`
 }
 
 // AddPredicates adds custom predicates to the where input to be used during the filtering phase.
@@ -353,6 +383,84 @@ func (i *EntClipMetadataWhereInput) P() (predicate.EntClipMetadata, error) {
 	}
 	if i.FormatContainsFold != nil {
 		predicates = append(predicates, entclipmetadata.FormatContainsFold(*i.FormatContainsFold))
+	}
+	if i.Word != nil {
+		predicates = append(predicates, entclipmetadata.WordEQ(*i.Word))
+	}
+	if i.WordNEQ != nil {
+		predicates = append(predicates, entclipmetadata.WordNEQ(*i.WordNEQ))
+	}
+	if len(i.WordIn) > 0 {
+		predicates = append(predicates, entclipmetadata.WordIn(i.WordIn...))
+	}
+	if len(i.WordNotIn) > 0 {
+		predicates = append(predicates, entclipmetadata.WordNotIn(i.WordNotIn...))
+	}
+	if i.WordGT != nil {
+		predicates = append(predicates, entclipmetadata.WordGT(*i.WordGT))
+	}
+	if i.WordGTE != nil {
+		predicates = append(predicates, entclipmetadata.WordGTE(*i.WordGTE))
+	}
+	if i.WordLT != nil {
+		predicates = append(predicates, entclipmetadata.WordLT(*i.WordLT))
+	}
+	if i.WordLTE != nil {
+		predicates = append(predicates, entclipmetadata.WordLTE(*i.WordLTE))
+	}
+	if i.WordContains != nil {
+		predicates = append(predicates, entclipmetadata.WordContains(*i.WordContains))
+	}
+	if i.WordHasPrefix != nil {
+		predicates = append(predicates, entclipmetadata.WordHasPrefix(*i.WordHasPrefix))
+	}
+	if i.WordHasSuffix != nil {
+		predicates = append(predicates, entclipmetadata.WordHasSuffix(*i.WordHasSuffix))
+	}
+	if i.WordEqualFold != nil {
+		predicates = append(predicates, entclipmetadata.WordEqualFold(*i.WordEqualFold))
+	}
+	if i.WordContainsFold != nil {
+		predicates = append(predicates, entclipmetadata.WordContainsFold(*i.WordContainsFold))
+	}
+	if i.Sentence != nil {
+		predicates = append(predicates, entclipmetadata.SentenceEQ(*i.Sentence))
+	}
+	if i.SentenceNEQ != nil {
+		predicates = append(predicates, entclipmetadata.SentenceNEQ(*i.SentenceNEQ))
+	}
+	if len(i.SentenceIn) > 0 {
+		predicates = append(predicates, entclipmetadata.SentenceIn(i.SentenceIn...))
+	}
+	if len(i.SentenceNotIn) > 0 {
+		predicates = append(predicates, entclipmetadata.SentenceNotIn(i.SentenceNotIn...))
+	}
+	if i.SentenceGT != nil {
+		predicates = append(predicates, entclipmetadata.SentenceGT(*i.SentenceGT))
+	}
+	if i.SentenceGTE != nil {
+		predicates = append(predicates, entclipmetadata.SentenceGTE(*i.SentenceGTE))
+	}
+	if i.SentenceLT != nil {
+		predicates = append(predicates, entclipmetadata.SentenceLT(*i.SentenceLT))
+	}
+	if i.SentenceLTE != nil {
+		predicates = append(predicates, entclipmetadata.SentenceLTE(*i.SentenceLTE))
+	}
+	if i.SentenceContains != nil {
+		predicates = append(predicates, entclipmetadata.SentenceContains(*i.SentenceContains))
+	}
+	if i.SentenceHasPrefix != nil {
+		predicates = append(predicates, entclipmetadata.SentenceHasPrefix(*i.SentenceHasPrefix))
+	}
+	if i.SentenceHasSuffix != nil {
+		predicates = append(predicates, entclipmetadata.SentenceHasSuffix(*i.SentenceHasSuffix))
+	}
+	if i.SentenceEqualFold != nil {
+		predicates = append(predicates, entclipmetadata.SentenceEqualFold(*i.SentenceEqualFold))
+	}
+	if i.SentenceContainsFold != nil {
+		predicates = append(predicates, entclipmetadata.SentenceContainsFold(*i.SentenceContainsFold))
 	}
 
 	switch len(predicates) {

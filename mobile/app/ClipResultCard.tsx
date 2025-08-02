@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Alert,
-  Linking,
-  Image,
-} from "react-native";
 import { useEvent } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { useFragment, graphql } from "react-relay";
+import { graphql, useFragment } from "react-relay";
 import { ClipResultCard_clipMetadata$key } from "./__generated__/ClipResultCard_clipMetadata.graphql";
-
-const { width: screenWidth } = Dimensions.get("window");
 
 // SVG Icons
 const FileIcon = ({ size = 16, color = "#6B7280" }) => (
@@ -76,6 +73,8 @@ const fragment = graphql`
     fileSize
     duration
     format
+    word
+    sentence
   }
 `;
 
@@ -136,16 +135,6 @@ export default function ClipResultCard({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // 从文件名提取单词
-  const extractWordFromFilename = (filename: string) => {
-    // 假设文件名格式：videoname_word_start_end.mp4
-    const parts = filename.split("_");
-    if (parts.length >= 2) {
-      return parts[1]; // 提取单词部分
-    }
-    return filename.replace(/\.[^/.]+$/, ""); // 移除扩展名作为备选
-  };
-
   const handleDownload = async () => {
     const url = `http://192.168.1.6:8081/${data.fileURL}`;
 
@@ -186,8 +175,6 @@ export default function ClipResultCard({
       console.error("视频播放控制错误:", error);
     }
   };
-
-  const word = extractWordFromFilename(data.filename);
 
   return (
     <View style={styles.card}>
@@ -260,7 +247,7 @@ export default function ClipResultCard({
       <View style={styles.cardContent}>
         {/* 单词标题 */}
         <View style={styles.titleSection}>
-          <Text style={styles.wordTitle}>"{word}"</Text>
+          <Text style={styles.wordTitle}>"{data.word}"</Text>
           <Text style={styles.filename} numberOfLines={1}>
             {data.filename}
           </Text>

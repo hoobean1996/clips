@@ -55,6 +55,8 @@ type ComplexityRoot struct {
 		Filename func(childComplexity int) int
 		Format   func(childComplexity int) int
 		ID       func(childComplexity int) int
+		Sentence func(childComplexity int) int
+		Word     func(childComplexity int) int
 	}
 
 	EntClipMetadataConnection struct {
@@ -182,6 +184,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.EntClipMetadata.ID(childComplexity), true
+
+	case "EntClipMetadata.sentence":
+		if e.complexity.EntClipMetadata.Sentence == nil {
+			break
+		}
+
+		return e.complexity.EntClipMetadata.Sentence(childComplexity), true
+
+	case "EntClipMetadata.word":
+		if e.complexity.EntClipMetadata.Word == nil {
+			break
+		}
+
+		return e.complexity.EntClipMetadata.Word(childComplexity), true
 
 	case "EntClipMetadataConnection.edges":
 		if e.complexity.EntClipMetadataConnection.Edges == nil {
@@ -1260,6 +1276,94 @@ func (ec *executionContext) fieldContext_EntClipMetadata_format(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _EntClipMetadata_word(ctx context.Context, field graphql.CollectedField, obj *ent.EntClipMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EntClipMetadata_word(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Word, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EntClipMetadata_word(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EntClipMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EntClipMetadata_sentence(ctx context.Context, field graphql.CollectedField, obj *ent.EntClipMetadata) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EntClipMetadata_sentence(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sentence, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EntClipMetadata_sentence(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EntClipMetadata",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EntClipMetadataConnection_edges(ctx context.Context, field graphql.CollectedField, obj *ent.EntClipMetadataConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EntClipMetadataConnection_edges(ctx, field)
 	if err != nil {
@@ -1453,6 +1557,10 @@ func (ec *executionContext) fieldContext_EntClipMetadataEdge_node(_ context.Cont
 				return ec.fieldContext_EntClipMetadata_duration(ctx, field)
 			case "format":
 				return ec.fieldContext_EntClipMetadata_format(ctx, field)
+			case "word":
+				return ec.fieldContext_EntClipMetadata_word(ctx, field)
+			case "sentence":
+				return ec.fieldContext_EntClipMetadata_sentence(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EntClipMetadata", field.Name)
 		},
@@ -4653,7 +4761,7 @@ func (ec *executionContext) unmarshalInputEntClipMetadataWhereInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "filename", "filenameNEQ", "filenameIn", "filenameNotIn", "filenameGT", "filenameGTE", "filenameLT", "filenameLTE", "filenameContains", "filenameHasPrefix", "filenameHasSuffix", "filenameEqualFold", "filenameContainsFold", "fileURL", "fileURLNEQ", "fileURLIn", "fileURLNotIn", "fileURLGT", "fileURLGTE", "fileURLLT", "fileURLLTE", "fileURLContains", "fileURLHasPrefix", "fileURLHasSuffix", "fileURLEqualFold", "fileURLContainsFold", "fileSize", "fileSizeNEQ", "fileSizeIn", "fileSizeNotIn", "fileSizeGT", "fileSizeGTE", "fileSizeLT", "fileSizeLTE", "duration", "durationNEQ", "durationIn", "durationNotIn", "durationGT", "durationGTE", "durationLT", "durationLTE", "format", "formatNEQ", "formatIn", "formatNotIn", "formatGT", "formatGTE", "formatLT", "formatLTE", "formatContains", "formatHasPrefix", "formatHasSuffix", "formatEqualFold", "formatContainsFold"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "filename", "filenameNEQ", "filenameIn", "filenameNotIn", "filenameGT", "filenameGTE", "filenameLT", "filenameLTE", "filenameContains", "filenameHasPrefix", "filenameHasSuffix", "filenameEqualFold", "filenameContainsFold", "fileURL", "fileURLNEQ", "fileURLIn", "fileURLNotIn", "fileURLGT", "fileURLGTE", "fileURLLT", "fileURLLTE", "fileURLContains", "fileURLHasPrefix", "fileURLHasSuffix", "fileURLEqualFold", "fileURLContainsFold", "fileSize", "fileSizeNEQ", "fileSizeIn", "fileSizeNotIn", "fileSizeGT", "fileSizeGTE", "fileSizeLT", "fileSizeLTE", "duration", "durationNEQ", "durationIn", "durationNotIn", "durationGT", "durationGTE", "durationLT", "durationLTE", "format", "formatNEQ", "formatIn", "formatNotIn", "formatGT", "formatGTE", "formatLT", "formatLTE", "formatContains", "formatHasPrefix", "formatHasSuffix", "formatEqualFold", "formatContainsFold", "word", "wordNEQ", "wordIn", "wordNotIn", "wordGT", "wordGTE", "wordLT", "wordLTE", "wordContains", "wordHasPrefix", "wordHasSuffix", "wordEqualFold", "wordContainsFold", "sentence", "sentenceNEQ", "sentenceIn", "sentenceNotIn", "sentenceGT", "sentenceGTE", "sentenceLT", "sentenceLTE", "sentenceContains", "sentenceHasPrefix", "sentenceHasSuffix", "sentenceEqualFold", "sentenceContainsFold"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5122,6 +5230,188 @@ func (ec *executionContext) unmarshalInputEntClipMetadataWhereInput(ctx context.
 				return it, err
 			}
 			it.FormatContainsFold = data
+		case "word":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("word"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Word = data
+		case "wordNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordNEQ = data
+		case "wordIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordIn = data
+		case "wordNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordNotIn = data
+		case "wordGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordGT = data
+		case "wordGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordGTE = data
+		case "wordLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordLT = data
+		case "wordLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordLTE = data
+		case "wordContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordContains = data
+		case "wordHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordHasPrefix = data
+		case "wordHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordHasSuffix = data
+		case "wordEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordEqualFold = data
+		case "wordContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("wordContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.WordContainsFold = data
+		case "sentence":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentence"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Sentence = data
+		case "sentenceNEQ":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceNEQ"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceNEQ = data
+		case "sentenceIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceIn = data
+		case "sentenceNotIn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceNotIn"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceNotIn = data
+		case "sentenceGT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceGT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceGT = data
+		case "sentenceGTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceGTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceGTE = data
+		case "sentenceLT":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceLT"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceLT = data
+		case "sentenceLTE":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceLTE"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceLTE = data
+		case "sentenceContains":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceContains"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceContains = data
+		case "sentenceHasPrefix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceHasPrefix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceHasPrefix = data
+		case "sentenceHasSuffix":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceHasSuffix"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceHasSuffix = data
+		case "sentenceEqualFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceEqualFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceEqualFold = data
+		case "sentenceContainsFold":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sentenceContainsFold"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SentenceContainsFold = data
 		}
 	}
 
@@ -5619,6 +5909,16 @@ func (ec *executionContext) _EntClipMetadata(ctx context.Context, sel ast.Select
 			}
 		case "format":
 			out.Values[i] = ec._EntClipMetadata_format(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "word":
+			out.Values[i] = ec._EntClipMetadata_word(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sentence":
+			out.Values[i] = ec._EntClipMetadata_sentence(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6700,6 +7000,28 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚖstring(ctx context.Context, v any) (*string, error) {
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	_ = sel
+	res := graphql.MarshalString(*v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

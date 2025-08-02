@@ -1,18 +1,10 @@
-schema {
-  query: Query
+schema { 
+  query: Query    
 }
 
-directive @goField(
-  forceResolver: Boolean
-  name: String
-  omittable: Boolean
-) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @goModel(
-  model: String
-  models: [String!]
-  forceGenerate: Boolean
-) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goModel(model: String, models: [String!], forceGenerate: Boolean) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
 """
 Define a Relay Cursor type:
@@ -23,64 +15,42 @@ scalar Cursor
 type EntClipMetadata implements Node {
   id: ID!
 
-  """
-  剪辑文件名
-  """
+  """剪辑文件名"""
   filename: String!
 
-  """
-  剪辑文件访问地址
-  """
+  """剪辑文件访问地址"""
   fileURL: String!
 
-  """
-  文件大小（字节）
-  """
+  """文件大小（字节）"""
   fileSize: Int!
 
-  """
-  视频时长（秒）
-  """
+  """视频时长（秒）"""
   duration: Int!
 
-  """
-  视频格式
-  """
+  """视频格式"""
   format: String!
+  word: String!
+  sentence: String!
 }
 
-"""
-A connection to a list of items.
-"""
+"""A connection to a list of items."""
 type EntClipMetadataConnection {
-  """
-  A list of edges.
-  """
+  """A list of edges."""
   edges: [EntClipMetadataEdge]
 
-  """
-  Information to aid in pagination.
-  """
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """
-  Identifies the total count of items in the connection.
-  """
+  """Identifies the total count of items in the connection."""
   totalCount: Int!
 }
 
-"""
-An edge in a connection.
-"""
+"""An edge in a connection."""
 type EntClipMetadataEdge {
-  """
-  The item at the end of the edge.
-  """
+  """The item at the end of the edge."""
   node: EntClipMetadata
 
-  """
-  A cursor for use in pagination.
-  """
+  """A cursor for use in pagination."""
   cursor: Cursor!
 }
 
@@ -93,9 +63,7 @@ input EntClipMetadataWhereInput {
   and: [EntClipMetadataWhereInput!]
   or: [EntClipMetadataWhereInput!]
 
-  """
-  id field predicates
-  """
+  """id field predicates"""
   id: ID
   idNEQ: ID
   idIn: [ID!]
@@ -105,9 +73,7 @@ input EntClipMetadataWhereInput {
   idLT: ID
   idLTE: ID
 
-  """
-  filename field predicates
-  """
+  """filename field predicates"""
   filename: String
   filenameNEQ: String
   filenameIn: [String!]
@@ -122,9 +88,7 @@ input EntClipMetadataWhereInput {
   filenameEqualFold: String
   filenameContainsFold: String
 
-  """
-  file_url field predicates
-  """
+  """file_url field predicates"""
   fileURL: String
   fileURLNEQ: String
   fileURLIn: [String!]
@@ -139,9 +103,7 @@ input EntClipMetadataWhereInput {
   fileURLEqualFold: String
   fileURLContainsFold: String
 
-  """
-  file_size field predicates
-  """
+  """file_size field predicates"""
   fileSize: Int
   fileSizeNEQ: Int
   fileSizeIn: [Int!]
@@ -151,9 +113,7 @@ input EntClipMetadataWhereInput {
   fileSizeLT: Int
   fileSizeLTE: Int
 
-  """
-  duration field predicates
-  """
+  """duration field predicates"""
   duration: Int
   durationNEQ: Int
   durationIn: [Int!]
@@ -163,9 +123,7 @@ input EntClipMetadataWhereInput {
   durationLT: Int
   durationLTE: Int
 
-  """
-  format field predicates
-  """
+  """format field predicates"""
   format: String
   formatNEQ: String
   formatIn: [String!]
@@ -179,64 +137,72 @@ input EntClipMetadataWhereInput {
   formatHasSuffix: String
   formatEqualFold: String
   formatContainsFold: String
+
+  """word field predicates"""
+  word: String
+  wordNEQ: String
+  wordIn: [String!]
+  wordNotIn: [String!]
+  wordGT: String
+  wordGTE: String
+  wordLT: String
+  wordLTE: String
+  wordContains: String
+  wordHasPrefix: String
+  wordHasSuffix: String
+  wordEqualFold: String
+  wordContainsFold: String
+
+  """sentence field predicates"""
+  sentence: String
+  sentenceNEQ: String
+  sentenceIn: [String!]
+  sentenceNotIn: [String!]
+  sentenceGT: String
+  sentenceGTE: String
+  sentenceLT: String
+  sentenceLTE: String
+  sentenceContains: String
+  sentenceHasPrefix: String
+  sentenceHasSuffix: String
+  sentenceEqualFold: String
+  sentenceContainsFold: String
 }
 
 type EntVideoMetadata implements Node {
   id: ID!
 
-  """
-  视频原始地址
-  """
+  """视频原始地址"""
   url: String!
 
-  """
-  原始文件名
-  """
+  """原始文件名"""
   filename: String!
 
-  """
-  文件大小(字节)
-  """
+  """文件大小(字节)"""
   fileSize: Int!
 
-  """
-  文件MIME类型
-  """
+  """文件MIME类型"""
   contentType: String!
 }
 
-"""
-A connection to a list of items.
-"""
+"""A connection to a list of items."""
 type EntVideoMetadataConnection {
-  """
-  A list of edges.
-  """
+  """A list of edges."""
   edges: [EntVideoMetadataEdge]
 
-  """
-  Information to aid in pagination.
-  """
+  """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """
-  Identifies the total count of items in the connection.
-  """
+  """Identifies the total count of items in the connection."""
   totalCount: Int!
 }
 
-"""
-An edge in a connection.
-"""
+"""An edge in a connection."""
 type EntVideoMetadataEdge {
-  """
-  The item at the end of the edge.
-  """
+  """The item at the end of the edge."""
   node: EntVideoMetadata
 
-  """
-  A cursor for use in pagination.
-  """
+  """A cursor for use in pagination."""
   cursor: Cursor!
 }
 
@@ -249,9 +215,7 @@ input EntVideoMetadataWhereInput {
   and: [EntVideoMetadataWhereInput!]
   or: [EntVideoMetadataWhereInput!]
 
-  """
-  id field predicates
-  """
+  """id field predicates"""
   id: ID
   idNEQ: ID
   idIn: [ID!]
@@ -261,9 +225,7 @@ input EntVideoMetadataWhereInput {
   idLT: ID
   idLTE: ID
 
-  """
-  url field predicates
-  """
+  """url field predicates"""
   url: String
   urlNEQ: String
   urlIn: [String!]
@@ -278,9 +240,7 @@ input EntVideoMetadataWhereInput {
   urlEqualFold: String
   urlContainsFold: String
 
-  """
-  filename field predicates
-  """
+  """filename field predicates"""
   filename: String
   filenameNEQ: String
   filenameIn: [String!]
@@ -295,9 +255,7 @@ input EntVideoMetadataWhereInput {
   filenameEqualFold: String
   filenameContainsFold: String
 
-  """
-  file_size field predicates
-  """
+  """file_size field predicates"""
   fileSize: Int
   fileSizeNEQ: Int
   fileSizeIn: [Int!]
@@ -307,9 +265,7 @@ input EntVideoMetadataWhereInput {
   fileSizeLT: Int
   fileSizeLTE: Int
 
-  """
-  content_type field predicates
-  """
+  """content_type field predicates"""
   contentType: String
   contentTypeNEQ: String
   contentTypeIn: [String!]
@@ -330,9 +286,7 @@ An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
 interface Node {
-  """
-  The id of the object.
-  """
+  """The id of the object."""
   id: ID!
 }
 
@@ -340,14 +294,10 @@ interface Node {
 Possible directions in which to order a list of items when provided an `orderBy` argument.
 """
 enum OrderDirection {
-  """
-  Specifies an ascending order for a given `orderBy` argument.
-  """
+  """Specifies an ascending order for a given `orderBy` argument."""
   ASC
 
-  """
-  Specifies a descending order for a given `orderBy` argument.
-  """
+  """Specifies a descending order for a given `orderBy` argument."""
   DESC
 }
 
@@ -356,56 +306,36 @@ Information about pagination in a connection.
 https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
 """
 type PageInfo {
-  """
-  When paginating forwards, are there more items?
-  """
+  """When paginating forwards, are there more items?"""
   hasNextPage: Boolean!
 
-  """
-  When paginating backwards, are there more items?
-  """
+  """When paginating backwards, are there more items?"""
   hasPreviousPage: Boolean!
 
-  """
-  When paginating backwards, the cursor to continue.
-  """
+  """When paginating backwards, the cursor to continue."""
   startCursor: Cursor
 
-  """
-  When paginating forwards, the cursor to continue.
-  """
+  """When paginating forwards, the cursor to continue."""
   endCursor: Cursor
 }
 
 type Query {
-  """
-  Fetches an object given its ID.
-  """
+  """Fetches an object given its ID."""
   node(
-    """
-    ID of the object.
-    """
+    """ID of the object."""
     id: ID!
   ): Node
 
-  """
-  Lookup nodes by a list of IDs.
-  """
+  """Lookup nodes by a list of IDs."""
   nodes(
-    """
-    The list of node IDs.
-    """
+    """The list of node IDs."""
     ids: [ID!]!
   ): [Node]!
   entClipMetadataSlice(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
+    """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
-    """
-    Returns the first _n_ elements from the list.
-    """
+    """Returns the first _n_ elements from the list."""
     first: Int
 
     """
@@ -413,9 +343,7 @@ type Query {
     """
     before: Cursor
 
-    """
-    Returns the last _n_ elements from the list.
-    """
+    """Returns the last _n_ elements from the list."""
     last: Int
 
     """
@@ -424,14 +352,10 @@ type Query {
     where: EntClipMetadataWhereInput
   ): EntClipMetadataConnection!
   entVideoMetadataSlice(
-    """
-    Returns the elements in the list that come after the specified cursor.
-    """
+    """Returns the elements in the list that come after the specified cursor."""
     after: Cursor
 
-    """
-    Returns the first _n_ elements from the list.
-    """
+    """Returns the first _n_ elements from the list."""
     first: Int
 
     """
@@ -439,9 +363,7 @@ type Query {
     """
     before: Cursor
 
-    """
-    Returns the last _n_ elements from the list.
-    """
+    """Returns the last _n_ elements from the list."""
     last: Int
 
     """

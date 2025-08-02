@@ -16,6 +16,8 @@ var (
 		{Name: "file_size", Type: field.TypeInt64},
 		{Name: "duration", Type: field.TypeInt},
 		{Name: "format", Type: field.TypeString, Default: "mp4"},
+		{Name: "word", Type: field.TypeString},
+		{Name: "sentence", Type: field.TypeString},
 	}
 	// EntClipMetadataTable holds the schema information for the "ent_clip_metadata" table.
 	EntClipMetadataTable = &schema.Table{

@@ -36,6 +36,9 @@ func (EntClipMetadata) Fields() []ent.Field {
 		field.String("format").
 			Default("mp4").
 			Comment("视频格式"),
+
+		field.String("word").Nillable(),
+		field.String("sentence").Nillable(),
 	}
 }
 

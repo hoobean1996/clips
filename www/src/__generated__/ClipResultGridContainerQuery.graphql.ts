@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c24ec3421831ed7a03c03b5b9b66db45>>
+ * @generated SignedSource<<6c4a4bdd00b6a01225a73a3087df4ef6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -77,6 +77,32 @@ export type EntClipMetadataWhereInput = {
   idNotIn?: ReadonlyArray<string> | null | undefined;
   not?: EntClipMetadataWhereInput | null | undefined;
   or?: ReadonlyArray<EntClipMetadataWhereInput> | null | undefined;
+  sentence?: string | null | undefined;
+  sentenceContains?: string | null | undefined;
+  sentenceContainsFold?: string | null | undefined;
+  sentenceEqualFold?: string | null | undefined;
+  sentenceGT?: string | null | undefined;
+  sentenceGTE?: string | null | undefined;
+  sentenceHasPrefix?: string | null | undefined;
+  sentenceHasSuffix?: string | null | undefined;
+  sentenceIn?: ReadonlyArray<string> | null | undefined;
+  sentenceLT?: string | null | undefined;
+  sentenceLTE?: string | null | undefined;
+  sentenceNEQ?: string | null | undefined;
+  sentenceNotIn?: ReadonlyArray<string> | null | undefined;
+  word?: string | null | undefined;
+  wordContains?: string | null | undefined;
+  wordContainsFold?: string | null | undefined;
+  wordEqualFold?: string | null | undefined;
+  wordGT?: string | null | undefined;
+  wordGTE?: string | null | undefined;
+  wordHasPrefix?: string | null | undefined;
+  wordHasSuffix?: string | null | undefined;
+  wordIn?: ReadonlyArray<string> | null | undefined;
+  wordLT?: string | null | undefined;
+  wordLTE?: string | null | undefined;
+  wordNEQ?: string | null | undefined;
+  wordNotIn?: ReadonlyArray<string> | null | undefined;
 };
 export type ClipResultGridContainerQuery$variables = {
   count?: number | null | undefined;
@@ -238,6 +264,20 @@ return {
                     "alias": null,
                     "args": null,
                     "kind": "ScalarField",
+                    "name": "word",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "sentence",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
                     "name": "__typename",
                     "storageKey": null
                   }
@@ -296,12 +336,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "ac31d3e9908c3c1eb22963c9e4fa559f",
+    "cacheID": "1af074b3ae4026fb09c76273707974a9",
     "id": null,
     "metadata": {},
     "name": "ClipResultGridContainerQuery",
     "operationKind": "query",
-    "text": "query ClipResultGridContainerQuery(\n  $count: Int = 5\n  $cursor: Cursor\n  $where: EntClipMetadataWhereInput!\n) {\n  ...ClipResultGridContainer_clip_mjR8k\n}\n\nfragment ClipResultCard_clipMetadata on EntClipMetadata {\n  id\n  filename\n  fileURL\n  fileSize\n  duration\n  format\n}\n\nfragment ClipResultGridContainer_clip_mjR8k on Query {\n  entClipMetadataSlice(first: $count, after: $cursor, where: $where) {\n    totalCount\n    edges {\n      node {\n        ...ClipResultCard_clipMetadata\n        id\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
+    "text": "query ClipResultGridContainerQuery(\n  $count: Int = 5\n  $cursor: Cursor\n  $where: EntClipMetadataWhereInput!\n) {\n  ...ClipResultGridContainer_clip_mjR8k\n}\n\nfragment ClipResultCard_clipMetadata on EntClipMetadata {\n  id\n  filename\n  fileURL\n  fileSize\n  duration\n  format\n  word\n  sentence\n}\n\nfragment ClipResultGridContainer_clip_mjR8k on Query {\n  entClipMetadataSlice(first: $count, after: $cursor, where: $where) {\n    totalCount\n    edges {\n      node {\n        ...ClipResultCard_clipMetadata\n        id\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n"
   }
 };
 })();
